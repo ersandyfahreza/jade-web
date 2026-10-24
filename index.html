@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -40,14 +41,17 @@
   <section id="form">
     <h2 class="sr-only">Form pesanan</h2>
     <!-- Kerangka saja: belum berfungsi (Tahap 2 dan seterusnya) -->
-    <p class="kotak-peringatan" id="data-gagal" role="status" hidden></p>
+    <div role="status">
+      <p class="kotak-peringatan" id="memuat">Sebentar ya, sedang memuat daftar tugas dan harga terbaru...</p>
+      <p class="kotak-peringatan" id="data-gagal" hidden></p>
+    </div>
     <form class="kartu" novalidate inert>
 
       <fieldset>
         <legend>Jenjang</legend>
         <div class="segmented">
-          <label><input type="radio" name="jenjang" value="Pelajar"> Pelajar <small>SMA/SMK/MA</small></label>
-          <label><input type="radio" name="jenjang" value="Mahasiswa"> Mahasiswa <small>D3/D4/S1</small></label>
+          <input type="radio" name="jenjang" id="jenjang-pelajar" value="Pelajar"><label for="jenjang-pelajar">Pelajar <small>SMA/SMK/MA</small></label>
+          <input type="radio" name="jenjang" id="jenjang-mahasiswa" value="Mahasiswa"><label for="jenjang-mahasiswa">Mahasiswa <small>D3/D4/S1</small></label>
         </div>
       </fieldset>
 
@@ -177,15 +181,19 @@
         <input type="text" name="website" tabindex="-1" autocomplete="off">
       </div>
 
-      <div class="panel" id="panel-kirim" role="status" hidden>
+      <div role="status">
+      <div class="panel" id="panel-kirim" hidden>
         <p id="panel-teks"></p>
         <div class="panel-tombol">
           <a class="tombol" id="wa-lagi" href="#">Buka WhatsApp lagi</a>
           <button type="button" class="tombol sekunder" id="salin">Salin pesan</button>
         </div>
-        <p class="bantuan" id="salin-status" hidden></p>
-        <textarea id="salin-manual" readonly hidden aria-label="Isi pesan WhatsApp"></textarea>
       </div>
+      </div>
+      <p class="bantuan" id="salin-status" role="status"></p>
+      <textarea id="salin-manual" readonly hidden aria-label="Isi pesan WhatsApp"></textarea>
+
+      <p class="peringatan peringatan-bawah">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
 
       <div class="bar">
         <div class="estimasi">
@@ -193,7 +201,8 @@
           <div aria-live="polite">
             <p class="pesan">Pilih jenis tugas untuk melihat estimasi.</p>
           </div>
-          <p class="peringatan">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
+          <p class="peringatan peringatan-penuh">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
+          <p class="peringatan peringatan-ringkas">Estimasi awal, harga final menunggu konfirmasi dari kami.</p>
         </div>
         <button type="submit" class="tombol penuh" aria-disabled="true">Kirim ke WhatsApp</button>
         <p class="galat" id="kirim-galat" role="alert" hidden></p>

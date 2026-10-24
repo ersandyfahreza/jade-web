@@ -58,6 +58,7 @@ jade-web/
 9. **Tidak ada kunci rahasia atau token** di repositori. URL Apps Script dan nomor WhatsApp memang publik.
 10. **Mobile first** (uji di lebar 360 px). Target sentuh minimal 44 px. Warna dan kontras mengikuti `docs/DESIGN.md`.
 11. Estimasi dihitung dengan tanggal hari ini zona **Asia/Jakarta**.
+12. Saat menguji, JANGAN pernah mengirim POST ke alamat Apps Script yang asli. Gunakan tiruan (mock) atau kosongkan `appsScriptUrl` di `assets/js/config.js` sementara dan kembalikan setelahnya. Jika perlu uji ke Sheets asli, minta izin pemilik dulu dan sebutkan data ujinya.
 
 ## Perintah
 

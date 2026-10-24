@@ -6,6 +6,15 @@
   const $ = (id) => document.getElementById(id);
   const form = document.querySelector("form.kartu");
   const tombolKirim = form.querySelector('button[type="submit"]');
+  $("memuat").remove();
+
+  // Tinggi bar menempel dipakai CSS (scroll-padding-bottom) agar kolom yang difokus tidak tertutup
+  const bar = form.querySelector(".bar");
+  // Browser tidak menggulir kolom yang hanya setengah tertutup bar; paksa sampai terlihat penuh
+  form.addEventListener("focusin", (e) => {
+    if (innerWidth <= 640 && !bar.contains(e.target)) e.target.scrollIntoView({ block: "nearest" });
+  });
+  new ResizeObserver(() => document.documentElement.style.setProperty("--tinggi-bar", bar.offsetHeight + "px")).observe(bar);
 
   // Pesan kesalahan resmi (SPEC layar Bagian 9)
   const PESAN = {
@@ -314,7 +323,7 @@
       }
       tautan = tautanWA(CONFIG.nomorWhatsApp, pesanTerakhir);
       $("wa-lagi").href = tautan;
-      $("salin-status").hidden = true;
+      $("salin-status").textContent = "";
       $("salin-manual").hidden = true;
       $("panel-kirim").hidden = false;
     } finally {
@@ -322,6 +331,7 @@
       sedangKirim = false;
       form.inert = false;
       perbarui(); // mengembalikan teks dan keadaan tombol
+      tombolKirim.focus(); // inert tadi melepas fokus; kembalikan agar keyboard dan pembaca layar tidak kehilangan posisi
     }
   }
 
@@ -336,7 +346,6 @@
       $("salin-manual").select();
       $("salin-status").textContent = "Pesan belum bisa disalin otomatis. Salin dari kotak di bawah ini.";
     }
-    $("salin-status").hidden = false;
   });
 
   // Angka harga di teks halaman diisi dari config

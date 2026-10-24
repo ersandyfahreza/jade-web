@@ -58,7 +58,7 @@ Mode gelap tidak dibuat di versi 1.
 | Fokus | Garis tebal 3 px `--utama` dengan jarak 2 px. Tidak boleh dihilangkan |
 | Kartu estimasi | Latar putih, garis `--utama` 2 px. Angka kisaran warna `--aksen`. Di HP tampil **menempel di bawah layar** (sticky) bersama tombol kirim |
 | Tombol utama | "Kirim ke WhatsApp": latar `--utama`, teks putih, tinggi 48 px, lebar penuh di HP |
-| Tombol non-aktif | Latar `--garis`, teks `--teks-redup`, kursor tidak boleh |
+| Tombol non-aktif | Latar `--garis`, teks `--teks` (kontras ± 7,7:1; `--teks-redup` hanya ± 3,8:1 di atas `--garis`), kursor tidak boleh |
 | Kotak peringatan | Latar putih, garis kiri 4 px `--aksen`, teks `--teks` |
 | Pesan error | Teks `--error` di bawah kolom, dengan ikon tanda seru. Warna **bukan satu-satunya** penanda |
 

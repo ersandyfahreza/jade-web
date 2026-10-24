@@ -175,12 +175,14 @@ Daftar ini disimpan di `assets/js/config.js` (bukan di Sheets).
 | Judul pembuka | Estimasi biaya pendampingan tugasmu, dalam 3 menit |
 | Subjudul | Pilih jenis tugas, isi kebutuhanmu, lihat estimasinya, lalu kirim ke kami lewat WhatsApp. Kami bantu menyusun draf bahan belajar, kamu yang memeriksa dan memahaminya. |
 | Tombol pembuka | Mulai pesan |
+| Status memuat data (form terkunci, hilang saat data selesai atau 8 detik habis; `role="status"`) | Sebentar ya, sedang memuat daftar tugas dan harga terbaru... |
 | Cara kerja, judul | Cara kerjanya |
 | Langkah 1 | **Isi form.** Pilih tugas dan ceritakan kebutuhanmu. |
 | Langkah 2 | **Kirim ke WhatsApp.** Pesan terisi otomatis, tinggal kirim, lalu kirim lampiranmu. |
 | Langkah 3 | **Kami konfirmasi.** Kami baca kebutuhanmu, lalu kabari harga final dan perkiraan selesai. |
 | Langkah 4 | **Bayar DP, kami kerjakan.** Kamu terima hasilnya, boleh revisi, lalu pelunasan. |
 | Peringatan estimasi (wajib dekat angka) | Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan. |
+| Peringatan ringkas (di bar HP yang menempel; teks penuh tetap tampil di atas bar) | Estimasi awal, harga final menunggu konfirmasi dari kami. |
 | Catatan privasi (dekat lampiran dan footer) | Jangan kirim KTP, nomor rekening, atau password. Lampiran hanya dipakai untuk pesananmu. |
 | Footer | Dibantu AI dan diperiksa oleh tim kami. Kamu tetap bertanggung jawab memeriksa isinya dan mengikuti aturan sekolah atau kampusmu. |
 | Daftar "Kami terima" | Kerangka dan outline, ringkasan dan resume, draf esai, makalah, laporan, dan proposal, PPT, soal latihan dan pembahasan, olah data, perbaikan bahasa dan format, CV dan surat, coding tugas kecil |
