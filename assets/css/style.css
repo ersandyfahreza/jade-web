@@ -1,14 +1,19 @@
 :root {
-  --latar: #F2F0EF;
-  --garis: #BBBDBC;
-  --utama: #245F73;
-  --aksen: #733E24;
-  --permukaan: #FFFFFF;
-  --teks: #1E2B30;
-  --teks-redup: #4A5A60;
-  --garis-input: #8A8D8C;
-  --utama-hover: #1B4A5A;
-  --error: #B3261E;
+  color-scheme: light;
+  --latar: #fbf8e9;
+  --latar-bagian: #f8eed2;
+  --permukaan: #ffffff;
+  --teks: #3b110c;
+  --teks-redup: #5d3d3a;
+  --utama: #8b372b;
+  --utama-hover: #7f3126;
+  --aksen: #a05f1a;
+  --sorot: #dd5013;       /* hiasan saja: bukan untuk teks atau garis kolom */
+  --peringatan: #e9e4a6;
+  --hias: #bdb7fc;        /* hiasan saja: bukan untuk teks atau garis kolom */
+  --error: #da1c1c;
+  --garis-input: #96817f;
+  --garis: #d9cbb4;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -53,12 +58,12 @@ a { color: var(--utama); }
 .tombol {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 48px; padding: 0 24px; border: 0; border-radius: 10px;
-  background: var(--utama); color: #fff; font: inherit; font-weight: 700;
+  background: var(--utama); color: var(--latar); font: inherit; font-weight: 700;
   text-decoration: none; cursor: pointer;
 }
 .tombol:hover { background: var(--utama-hover); }
 .tombol:disabled, .tombol:disabled:hover, .tombol[aria-disabled="true"], .tombol[aria-disabled="true"]:hover {
-  background: var(--garis); color: var(--teks); cursor: not-allowed;
+  background: var(--latar-bagian); color: var(--teks-redup); box-shadow: inset 0 0 0 1px var(--garis-input); cursor: not-allowed;
 }
 .tombol.penuh { width: 100%; }
 .tombol.sekunder, .tombol.sekunder:hover { background: var(--permukaan); color: var(--utama); border: 2px solid var(--utama); }
@@ -78,7 +83,7 @@ a { color: var(--utama); }
 .langkah li::before {
   content: counter(l); position: absolute; left: 0; top: 0;
   width: 32px; height: 32px; border-radius: 50%;
-  background: var(--utama); color: #fff; font-weight: 700;
+  background: var(--hias); color: var(--teks); font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
 
@@ -96,7 +101,7 @@ legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
 .galat:not([hidden]) { display: flex; gap: 6px; }
 .galat::before {
   content: "!"; flex: none; width: 16px; height: 16px; margin-top: 2px; border-radius: 50%;
-  background: var(--error); color: #fff; font-size: 12px; font-weight: 700; line-height: 16px; text-align: center;
+  background: var(--error); color: var(--permukaan); font-size: 12px; font-weight: 700; line-height: 16px; text-align: center;
 }
 [aria-invalid="true"] { border-color: var(--error); }
 .catatan-privasi { font-size: 14px; color: var(--teks-redup); }
@@ -104,8 +109,8 @@ legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
 /* Wizard: penunjuk langkah, judul langkah, Kembali, ringkasan */
 .penunjuk { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0 0 16px; padding: 0; }
 .penunjuk li { flex: 1; height: 4px; border-radius: 4px; background: var(--garis); }
-.penunjuk li.selesai, .penunjuk li[aria-current="step"] { background: var(--utama); }
-.penunjuk li[aria-current="step"] { height: 8px; }
+.penunjuk li.selesai { background: var(--utama); }
+.penunjuk li[aria-current="step"] { height: 8px; background: var(--sorot); }
 .langkah-ke { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--teks-redup); }
 .judul-langkah { margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--utama); }
 .penjelas { margin: 0 0 8px; }
@@ -140,7 +145,7 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .segmented label small { font-weight: 400; font-size: 14px; }
 .segmented input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.segmented input:checked + label { background: var(--utama); color: #fff; border-color: var(--utama); }
+.segmented input:checked + label { background: var(--utama); color: var(--latar); border-color: var(--utama); }
 .segmented input:focus-visible + label { outline: 3px solid var(--utama); outline-offset: 2px; }
 
 .centang { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; margin-bottom: 8px; }
@@ -159,7 +164,7 @@ textarea { min-height: 120px; resize: vertical; }
 .estimasi [hidden] { display: none !important; }
 .peringatan-ringkas, .peringatan-bawah { display: none; }
 .kotak-peringatan {
-  background: var(--permukaan); border-left: 4px solid var(--aksen);
+  background: var(--peringatan); border-left: 4px solid var(--aksen);
   padding: 12px 16px; color: var(--teks);
 }
 
