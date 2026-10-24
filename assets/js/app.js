@@ -96,12 +96,11 @@
   }
 
   const angkaIsian = (id) => ($(id).value.trim() !== "" ? Number($(id).value) : NaN);
-  const rupiah = (n) => "Rp" + n.toLocaleString("id-ID");
   const kartu = form.querySelector(".estimasi [aria-live]");
   let timerEstimasi;
   let isiTerakhir;
 
-  function tampilkanEstimasi() {
+  function hitungSekarang() {
     const sisa = hitungSisaHari($("tenggat").value, hariIni());
     const hasil = tugasTerpilih()
       ? hitungEstimasi(config, {
@@ -110,6 +109,11 @@
           format: $("format").value, sitasi: $("sitasi").checked, penjelasan: $("penjelasan").checked
         })
       : null;
+    return { sisa, hasil };
+  }
+
+  function tampilkanEstimasi() {
+    const { sisa, hasil } = hitungSekarang();
     // Susun teks dulu; isi kartu hanya diganti jika berbeda, agar pembaca layar tidak membacakan ulang
     const isi = [];
     if (!hasil) isi.push(["pesan", "Pilih jenis tugas untuk melihat estimasi."]);
@@ -118,7 +122,7 @@
     } else if (hasil.status === "tidakBisa" && hasil.alasan === "aturanTenggat") {
       isi.push(["pesan", PESAN.hargaGagal]);
     } else if (hasil.status === "ok") {
-      isi.push(["angka", `${rupiah(hasil.bawah)} - ${rupiah(hasil.atas)}`]);
+      isi.push(["angka", `${rupiahWA(hasil.bawah)} - ${rupiahWA(hasil.atas)}`]);
       if (hasil.lainnya) isi.push(["pesan", "Karena tugasnya di luar daftar, kisarannya lebih lebar. Harga pasti kami kabari setelah membaca kebutuhanmu."]);
       if (hasil.hariIni) isi.push(["kotak-peringatan", "Tenggat hari ini perlu kami konfirmasi dulu, belum tentu bisa. Kami kabari lewat WhatsApp."]);
     }
@@ -212,8 +216,60 @@
     FIELDS.forEach((f) => dipakai.add(f.id));
     perbarui();
     const salah = FIELDS.find((f) => adaField(f) && periksa(f));
-    if (salah) elemen(salah).focus();
-    // Mengirim ke WhatsApp dikerjakan di Tahap 4
+    if (salah) return elemen(salah).focus();
+    kirim();
+  });
+
+  let pesanTerakhir = "";
+
+  function kirim() {
+    tombolKirim.textContent = "Mencatat pesananmu...";
+    tombolKirim.setAttribute("aria-disabled", "true");
+    // Cadangan bila penyusunan pesan error tak terduga: WhatsApp tetap terbuka (CLAUDE.md aturan 4)
+    let tautan = tautanWA(CONFIG.nomorWhatsApp, "Halo Jade, aku mau pesan layanan pendampingan.");
+    try {
+      // Tahap 6: catat ke Sheets lewat Apps Script (batas config.batasWaktuMs). Sampai alamatnya terisi, anggap gagal tanpa menunggu.
+      const kode = buatKodeSementara();
+      const { sisa, hasil } = hitungSekarang();
+      const tugas = tugasTerpilih();
+      pesanTerakhir = susunPesanWA({
+        kode, jenjang: jenjang(),
+        prodi: $("prodi").value.trim(), semester: Number($("semester").value), matkul: $("matkul").value.trim(),
+        kelas: $("kelas").value, mapel: $("mapel").value === "Lainnya" ? $("mapel-lain").value.trim() : $("mapel").value,
+        jenisTugas: tugasLainnya() ? `Tugas lainnya (${$("jenis-lain").value.trim()})` : $("jenis").value,
+        target: Number($("target").value), satuan: tugas.satuan,
+        jmlFile: Number($("jml-file").value), totalHlm: jmlFileNol() ? 0 : Number($("total-hlm").value),
+        format: $("format").value, tenggat: $("tenggat").value, sisaHari: sisa,
+        sitasi: $("sitasi").checked, penjelasan: $("penjelasan").checked,
+        kebutuhan: $("kebutuhan").value, ketentuan: $("ketentuan").value,
+        bawah: hasil.bawah, atas: hasil.status === "ok" ? hasil.atas : null,
+        hargaBelumTerbaca: hasil.status !== "ok" && hasil.status !== "hubungi",
+        batasLampiran: config.harga.batasLampiran, belumTercatat: true
+      });
+      $("panel-teks").textContent = `Pesananmu belum tercatat otomatis, tapi tetap bisa kamu kirim lewat WhatsApp. Kode sementara: ${kode}`;
+      tautan = tautanWA(CONFIG.nomorWhatsApp, pesanTerakhir);
+      $("wa-lagi").href = tautan;
+      $("salin-status").hidden = true;
+      $("salin-manual").hidden = true;
+      $("panel-kirim").hidden = false;
+    } finally {
+      window.location.href = tautan;
+      perbarui(); // mengembalikan teks dan keadaan tombol
+    }
+  }
+
+  $("salin").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(pesanTerakhir);
+      $("salin-manual").hidden = true;
+      $("salin-status").textContent = "Pesan disalin.";
+    } catch (err) {
+      $("salin-manual").value = pesanTerakhir;
+      $("salin-manual").hidden = false;
+      $("salin-manual").select();
+      $("salin-status").textContent = "Pesan belum bisa disalin otomatis. Salin dari kotak di bawah ini.";
+    }
+    $("salin-status").hidden = false;
   });
 
   // Angka harga di teks halaman diisi dari config

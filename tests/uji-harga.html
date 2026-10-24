@@ -25,8 +25,14 @@
   <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
   <tbody id="baris2"></tbody>
 </table>
+<h2>Pesan WhatsApp</h2>
+<table>
+  <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
+  <tbody id="baris3"></tbody>
+</table>
 <script src="../data/fallback.js"></script>
 <script src="../assets/js/pricing.js"></script>
+<script src="../assets/js/pesan.js"></script>
 <script>
   // Angka diharapkan disalin dari docs/RENCANA_UJI.md Bagian 1. Jangan diubah; perbaiki pricing.js.
   // [no, jenjang, tugas, target, lampiran, sisaHari, format, sitasi, penjelasan, bawah, atas]
@@ -88,6 +94,59 @@
     ["T1", "Tabel tenggat tanpa baris 0, sisa 0", "tidakBisa: aturanTenggat", hariIniTes.status + ": " + hariIniTes.alasan]
   ].map(([no, nama, harap, hasil]) => [no, nama, String(harap), String(hasil), String(harap) === String(hasil)]);
 
+  // Bagian 3: pesan WhatsApp (SPEC layar Bagian 6). Teks diharapkan ditulis tangan dari spesifikasi.
+  const mhs = {
+    kode: "JD-OFF-AB12", jenjang: "Mahasiswa", prodi: "Ekonomi", semester: "3", matkul: "Pengantar Ilmu Ekonomi",
+    jenisTugas: "Draf makalah", target: "8", satuan: "hlm", jmlFile: "2", totalHlm: "30", format: "PDF",
+    tenggat: "2026-10-28", sisaHari: 4, sitasi: true, penjelasan: false, kebutuhan: "Butuh draf tentang inflasi", ketentuan: "-",
+    bawah: 88000, atas: 106000, batasLampiran: 100, belumTercatat: false
+  };
+  const pelajar = Object.assign({}, mhs, { jenjang: "Pelajar", kelas: "11", mapel: "Fisika", sitasi: false, penjelasan: true });
+  const pesanMhs = susunPesanWA(mhs);
+  const pesanPlj = susunPesanWA(pelajar);
+  const lengkap = [
+    "Halo Jade, aku mau pesan layanan pendampingan.", "",
+    "Kode pesanan: JD-OFF-AB12", "Jenjang: Mahasiswa", "Prodi: Ekonomi", "Semester: 3", "Mata kuliah: Pengantar Ilmu Ekonomi",
+    "Jenis tugas: Draf makalah", "Target output: 8 hlm", "Lampiran: 2 file, total 30 hlm (akan kukirim di chat ini)",
+    "Format output: PDF", "Tenggat: 28 Okt 2026 (4 hari lagi)", "Tambahan: Sitasi diperiksa manual", "",
+    "Kebutuhan detail:", "Butuh draf tentang inflasi", "", "Ketentuan tugas:", "-", "",
+    "Estimasi: Rp88.000 - Rp106.000", "(Estimasi awal, harga final menunggu konfirmasi dari kalian.)"
+  ].join("\n");
+  const panjang400 = susunPesanWA(Object.assign({}, mhs, { kebutuhan: "a".repeat(400) }));
+  const panjang401 = susunPesanWA(Object.assign({}, mhs, { kebutuhan: "a".repeat(401) }));
+  const lampiranLebih = susunPesanWA(Object.assign({}, mhs, { atas: null }));
+  const offline = susunPesanWA(Object.assign({}, mhs, { belumTercatat: true }));
+  const baris3 = [
+    ["W1", "Mahasiswa: semua baris persis format", lengkap, pesanMhs],
+    ["W2", "Pelajar: Kelas dan mapel, tanpa Semester/Prodi, Tambahan penjelasan", "benar",
+      pesanPlj.includes("\nKelas: 11\nMata pelajaran: Fisika\nJenis") && !/Semester|Prodi/.test(pesanPlj) && pesanPlj.includes("Tambahan: Penjelasan hasil") ? "benar" : "salah"],
+    ["W3", "Tambahan kosong", "Tambahan: tidak ada", susunPesanWA(Object.assign({}, mhs, { sitasi: false })).match(/Tambahan: .*/)[0]],
+    ["W4", "Teks tepat 400 karakter tidak dipotong", "tanpa keterangan", String(!panjang400.includes("selengkapnya") ? "tanpa keterangan" : "dipotong")],
+    ["W5", "Teks 401 karakter dipotong jadi 400 + keterangan",
+      "a".repeat(400) + " ... (selengkapnya di pesanan JD-OFF-AB12)", panjang401.split("\n")[15]],
+    ["W6", "Lampiran melebihi batas: baris Estimasi diganti",
+      "Estimasi: tidak dihitung (lampiran lebih dari 100 hlm), mohon dihitung manual.", lampiranLebih.match(/Estimasi: .*/)[0]],
+    ["W7", "Belum tercatat: baris Catatan di akhir", "Catatan: pesanan belum tercatat otomatis.", offline.split("\n").pop()],
+    ["W8", "Sudah tercatat: tanpa baris Catatan", "tanpa Catatan", pesanMhs.includes("Catatan") ? "ada Catatan" : "tanpa Catatan"],
+    ["W9", "Format tanggal Indonesia", "5 Mei 2026", tanggalIndonesia("2026-05-05")],
+    ["W10", "Kode sementara berformat JD-OFF-XXXX", "cocok", /^JD-OFF-[A-Z0-9]{4}$/.test(buatKodeSementara()) ? "cocok" : "tidak cocok"],
+    ["W11", "Tautan wa.me: nomor benar, baris baru jadi %0A", "cocok",
+      tautanWA("6289619114292", "Halo\nJade") === "https://wa.me/6289619114292?text=Halo%0AJade" ? "cocok" : tautanWA("6289619114292", "Halo\nJade")],
+    ["W12", "Harga belum terbaca: baris Estimasi khusus, bukan kalimat lampiran",
+      "Estimasi: tidak dihitung (data harga belum terbaca), mohon dihitung manual.",
+      susunPesanWA(Object.assign({}, mhs, { atas: null, hargaBelumTerbaca: true })).match(/Estimasi: .*/)[0]],
+    ["P1", "potongTeks: tepat 400 karakter tidak dipotong", "a".repeat(400), potongTeks("a".repeat(400), "K1")],
+    ["P2", "potongTeks: 401 karakter dipotong 400 + keterangan", "a".repeat(400) + " ... (selengkapnya di pesanan K1)", potongTeks("a".repeat(401), "K1")],
+    ["P3", "potongTeks: emoji di batas 399-400 tetap sah", "sah",
+      (() => { const r = potongTeks("a".repeat(399) + "\u{1F600}b", "K1"); try { encodeURIComponent(r); } catch (e) { return "error"; }
+        return r === "a".repeat(399) + "\u{1F600} ... (selengkapnya di pesanan K1)" ? "sah" : r; })()],
+    ["P4", "potongTeks: 1000 karakter penuh emoji dipotong 400 karakter utuh", "sah",
+      (() => { const r = potongTeks("\u{1F600}".repeat(500), "K1"); try { encodeURIComponent(r); } catch (e) { return "error"; }
+        return Array.from(r.split(" ... (")[0]).length === 400 && r.includes("selengkapnya") ? "sah" : "salah"; })()],
+    ["P5", "potongTeks: 400 emoji (800 unit) tidak dipotong", "tanpa keterangan",
+      potongTeks("\u{1F600}".repeat(400), "K1").includes("selengkapnya") ? "dipotong" : "tanpa keterangan"]
+  ].map(([no, nama, harap, hasil]) => [no, nama, String(harap), String(hasil), String(harap) === String(hasil)]);
+
   function isiTabel(id, data) {
     const tbody = document.getElementById(id);
     data.forEach(([no, nama, harap, hasil, ok]) => {
@@ -100,7 +159,8 @@
   }
   isiTabel("baris", baris);
   isiTabel("baris2", baris2);
-  const semua = baris.concat(baris2);
+  isiTabel("baris3", baris3);
+  const semua = baris.concat(baris2, baris3);
   const gagal = semua.filter((b) => !b[4]).length;
   document.getElementById("ringkas").textContent = gagal ? `${gagal} dari ${semua.length} baris CEK.` : `Semua ${semua.length} baris OK.`;
 </script>

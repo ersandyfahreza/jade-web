@@ -70,6 +70,10 @@ Dicoba di HP asli (minimal satu Android atau iPhone) dan di komputer.
 | S11 | Kebutuhan 1000 karakter dan ketentuan 1000 karakter | Tercatat penuh di Sheets, pesan WhatsApp dipotong 400 karakter dengan keterangan "selengkapnya di pesanan {{kode}}", WhatsApp tetap terbuka |
 | S12 | Tautan WhatsApp | Terbuka ke nomor 6289619114292 dengan pesan terisi, format sesuai SPEC layar Bagian 6 |
 | S13 | `?action=config` di browser | Hanya tugas dan harga, tidak ada data pesanan |
+| S14 | Isi kebutuhan dengan emoji di sekitar karakter ke-400, lalu kirim | Tombol tidak macet, WhatsApp terbuka, pesan terpotong dengan keterangan |
+| S15 | Tekan "Salin pesan" di alamat tanpa HTTPS atau saat izin clipboard ditolak | Kotak teks berisi pesan muncul dan terpilih, bisa disalin manual |
+| S16 | Total halaman lampiran 101 | Estimasi tidak tampil, tombol "Hubungi kami lewat WhatsApp", baris Estimasi di pesan memakai kalimat "lampiran lebih dari 100 hlm" |
+| S17 | Hapus baris tenggat hari 0 dari tab Harga (atau dari `data/fallback.js` saat uji), muat ulang, lalu kirim | Pesanan tetap terkirim, baris Estimasi di pesan: "tidak dihitung (data harga belum terbaca)", bukan kalimat lampiran |
 
 ## 4. Daftar periksa sebelum rilis (soft launch)
 

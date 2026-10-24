@@ -61,6 +61,12 @@ a { color: var(--utama); }
   background: var(--garis); color: var(--teks-redup); cursor: not-allowed;
 }
 .tombol.penuh { width: 100%; }
+.tombol.sekunder, .tombol.sekunder:hover { background: var(--permukaan); color: var(--utama); border: 2px solid var(--utama); }
+
+/* Panel setelah kirim */
+.panel { background: var(--permukaan); border-left: 4px solid var(--utama); padding: 16px; margin-top: 24px; }
+.panel-tombol { display: grid; gap: 8px; margin-bottom: 8px; }
+#salin-manual { margin-top: 8px; }
 
 /* Cara kerja */
 .langkah { list-style: none; margin: 0; padding: 0; counter-reset: l; }

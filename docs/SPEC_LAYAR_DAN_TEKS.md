@@ -157,6 +157,7 @@ Aturan:
 3. Jika Sheets gagal, tambahkan baris: "Catatan: pesanan belum tercatat otomatis."
 4. Tanggal ditulis format Indonesia (contoh "28 Okt 2026"). Angka uang memakai pemisah titik (contoh Rp88.000).
 5. Tidak ada nomor HP, alamat, atau data pribadi lain di pesan.
+6. Jika harga tidak bisa dihitung karena data harga bermasalah (bukan karena lampiran), baris Estimasi diganti: "Estimasi: tidak dihitung (data harga belum terbaca), mohon dihitung manual."
 
 ## 7. Daftar pilihan Pelajar
 

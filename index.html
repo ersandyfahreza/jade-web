@@ -176,6 +176,16 @@
         <input type="text" name="website" tabindex="-1" autocomplete="off">
       </div>
 
+      <div class="panel" id="panel-kirim" role="status" hidden>
+        <p id="panel-teks"></p>
+        <div class="panel-tombol">
+          <a class="tombol" id="wa-lagi" href="#">Buka WhatsApp lagi</a>
+          <button type="button" class="tombol sekunder" id="salin">Salin pesan</button>
+        </div>
+        <p class="bantuan" id="salin-status" hidden></p>
+        <textarea id="salin-manual" readonly hidden aria-label="Isi pesan WhatsApp"></textarea>
+      </div>
+
       <div class="bar">
         <div class="estimasi">
           <p class="judul">Estimasi biaya</p>
@@ -244,6 +254,7 @@
 <script src="assets/js/config.js"></script>
 <script src="data/fallback.js"></script>
 <script src="assets/js/pricing.js"></script>
+<script src="assets/js/pesan.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
