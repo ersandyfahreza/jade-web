@@ -66,6 +66,17 @@ Dicoba di HP asli (minimal satu Android atau iPhone) dan di komputer.
 | W8 | Ukur tinggi bar di 360 x 640 pada: langkah 1, estimasi tampil, lampiran 101 halaman, tenggat hari ini | Setiap keadaan kurang dari 160 px (25% layar). Hasil terukur Tahap wizard: 120, 81 (kosong), 140, 154 px |
 | W9 | Tab dengan keyboard di setiap langkah | Fokus tidak masuk ke kolom di langkah tersembunyi, tidak ada galat "invalid form control" di konsol |
 | W10 | Ringkasan langkah 4 setelah mengisi prodi `<b>x</b>` | Tampil sebagai teks apa adanya, bukan tebal |
+| G1 | Buka halaman dengan pengaturan sistem gerak normal | Judul, paragraf, dan tombol pembuka muncul bertahap (±0,4 detik), lalu diam |
+| G2 | Aktifkan "kurangi gerak" di sistem (Windows: Efek animasi mati; Android: Hapus animasi; iPhone: Kurangi Gerakan), muat ulang, lalu isi form sampai kirim | Tidak ada gerak sama sekali, semua konten dan tombol tetap berfungsi |
+| G3 | Lanjut dan Kembali antar langkah di 360 px | Isi langkah bergeser dari kanan (maju) dan dari kiri (kembali), tidak ada gulir mendatar, fokus langsung di judul, keyboard bisa mengetik tanpa menunggu |
+| G4 | Pilih Mahasiswa atau Pelajar, pilih "Lainnya" di mata pelajaran, pilih "Tugas lainnya", isi jumlah file dari 0 ke angka lain | Kolom yang muncul memudar halus, kolom di bawahnya tidak melompat berlebihan saat mengetik |
+| G5 | Tekan tombol Lanjut dengan jari dan mouse | Warna berubah halus, tombol mengecil sedikit saat ditekan; tombol non-aktif (abu-abu krem) tidak mengecil |
+| G6 | Fokus kolom dengan Tab | Garis tepi berubah halus ke warna utama, garis fokus 3 px langsung terlihat |
+| G7 | Picu pesan kesalahan (Lanjut dengan kolom kosong) | Pesan memudar masuk, tanpa getar |
+| G8 | Ubah total halaman atau tenggat sampai angka kisaran berubah | Sorotan krem kekuningan memudar sebentar di belakang angka. Teks berganti seketika. Pembaca layar tidak mengumumkan dua kali |
+| G9 | Gulir ke form di HP (pertama kali) | Bar bawah naik halus sekali; gulir berikutnya tidak mengulang |
+| G10 | Kirim pesanan (Sheets hidup) dan kembali dari WhatsApp | Panel muncul lembut dan centang tergambar; bila Sheets gagal, panel tanpa centang |
+| G11 | Gerak di HP kelas bawah atau lama | Tidak patah-patah (hanya transform dan opacity yang dipakai). Catat bila terasa berat |
 | W11 | Pembaca layar sungguhan (TalkBack atau VoiceOver) saat pindah langkah | Pengumuman terdengar sekali dan jelas, tidak ganda atau memotong |
 
 ## 3. Uji pesanan dan Sheets

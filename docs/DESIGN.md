@@ -79,10 +79,34 @@ Mode gelap tidak dibuat. Halaman mengunci mode terang lewat `<meta name="color-s
 | Nomor langkah "Cara kerjanya" | Lingkaran 32 px latar `--hias`, angka `--teks` tebal |
 | Pesan error | Teks `--error` di bawah kolom, dengan ikon tanda seru. Warna **bukan satu-satunya** penanda |
 
+## Gerak
+
+Gerak halus hanya sebagai umpan balik, bukan syarat untuk melihat konten.
+
+- Semua `animation` dan `transition` berada di dalam `@media (prefers-reduced-motion: no-preference)`. Di luar itu tidak ada gerak. Semua keyframe hanya punya `from`, jadi tanpa animasi elemen tampil normal.
+- Hanya `transform`, `opacity`, `stroke-dashoffset` (SVG), dan transisi warna singkat. Tidak ada animasi tinggi, lebar, atau bayangan. Durasi 120 sampai 250 ms, `ease-out`. Jeda hanya pada pembukaan (0/50/100 ms) dan centang panel (120 ms).
+- Tidak ada animasi yang menghalangi mengetik atau mengetuk. Garis fokus (`outline` 3 px, jarak 2 px) tidak diberi transisi. Fokus pindah seketika, tidak menunggu animasi.
+- Area `aria-live` tidak diubah demi animasi. JavaScript hanya menambah atau menghapus kelas dan atribut tampilan (`data-arah`, `.baru`, `.bar-masuk`, `.belum-tercatat`).
+
+| Gerak | Cara | Durasi |
+|---|---|---|
+| Pembukaan halaman | Judul, paragraf, tombol naik 12 px sambil muncul, bertahap | 250 ms |
+| Pindah langkah | Isi langkah geser 16 px dan muncul, maju dari kanan, kembali dari kiri (`data-arah` di form). Langkah 1 saat halaman dibuka tidak bergerak. Judul langkah berganti seketika | 200 ms |
+| Bilah kemajuan | Isi segmen lewat `scaleX` (0 ke 1). Segmen aktif `--sorot`, yang selesai berubah ke `--utama` | transform 250 ms, warna 200 ms |
+| Kolom dinamis | Kelas `.baru` pada kolom yang baru muncul: fade dan turun 6 px | 180 ms |
+| Tombol | Warna berubah halus, tekan `scale(.98)` (bukan untuk tombol non-aktif). Berlaku juga untuk Kembali dan segmen jenjang | 120 ms |
+| Kolom isian | Garis tepi berubah ke `--utama` saat fokus (kecuali sedang error) | 150 ms |
+| Pesan kesalahan | Fade, tanpa getar | 150 ms |
+| Kisaran estimasi | Sorotan `--peringatan` memudar di belakang angka yang baru. Teks diganti seketika, tanpa hitung naik. Puncak sorotan 0,8 agar teks coffee tetap terbaca (kontras teks besar minimal 3:1) | 250 ms |
+| Bar HP | Naik 16 px sambil muncul, sekali, saat bar pertama terlihat penuh | 220 ms |
+| Panel tercatat | Panel muncul lembut; centang SVG tergambar lewat `stroke-dashoffset`. Centang disembunyikan bila pesanan belum tercatat | panel 220 ms, centang 250 ms |
+
+`.kartu` memakai `overflow-x: clip` agar geseran langkah tidak menimbulkan gulir mendatar. Berbeda dari `hidden`, `clip` tidak membuat kontainer gulir, jadi bar yang menempel tetap berfungsi.
+
 ## Aksesibilitas
 
 - Atribut bahasa halaman `lang="id"`.
 - Setiap kolom punya `<label>`. Error dihubungkan dengan `aria-describedby`.
 - Angka estimasi berada di area `aria-live="polite"` supaya pembaca layar mengumumkan perubahannya.
 - Semua bisa dioperasikan dengan keyboard. Urutan tab mengikuti urutan visual.
-- Hormati pengaturan `prefers-reduced-motion` (tidak ada animasi besar).
+- Hormati pengaturan `prefers-reduced-motion`: tanpa preferensi gerak, tidak ada animasi sama sekali (lihat bagian Gerak).

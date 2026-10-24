@@ -70,6 +70,9 @@ a { color: var(--utama); }
 
 /* Panel setelah kirim */
 .panel { background: var(--permukaan); border-left: 4px solid var(--utama); padding: 16px; margin-top: 24px; }
+.centang-kirim { display: block; margin-bottom: 8px; }
+.centang-kirim path { fill: none; stroke: var(--utama); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; }
+.panel.belum-tercatat .centang-kirim { display: none; }
 .panel-tombol { display: grid; gap: 8px; margin-bottom: 8px; }
 #salin-manual { margin-top: 8px; }
 #salin-status { margin-top: 8px; }
@@ -90,7 +93,7 @@ a { color: var(--utama); }
 /* Form */
 .kartu {
   background: var(--permukaan); border: 1px solid var(--garis);
-  border-radius: 14px; padding: 24px 16px;
+  border-radius: 14px; padding: 24px 16px; overflow-x: clip;
 }
 fieldset { border: 0; margin: 0 0 32px; padding: 0; min-width: 0; }
 legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
@@ -108,14 +111,17 @@ legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
 
 /* Wizard: penunjuk langkah, judul langkah, Kembali, ringkasan */
 .penunjuk { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0 0 16px; padding: 0; }
-.penunjuk li { flex: 1; height: 4px; border-radius: 4px; background: var(--garis); }
-.penunjuk li.selesai { background: var(--utama); }
-.penunjuk li[aria-current="step"] { height: 8px; background: var(--sorot); }
+.penunjuk li { position: relative; flex: 1; height: 4px; border-radius: 4px; background: var(--garis); overflow: hidden; }
+.penunjuk li::after { content: ""; position: absolute; inset: 0; background: var(--utama); transform: scaleX(0); transform-origin: left; }
+.penunjuk li.selesai::after { transform: scaleX(1); }
+.penunjuk li[aria-current="step"] { height: 8px; }
+.penunjuk li[aria-current="step"]::after { background: var(--sorot); transform: scaleX(1); }
 .langkah-ke { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--teks-redup); }
 .judul-langkah { margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--utama); }
 .penjelas { margin: 0 0 8px; }
 .keterangan-wajib { margin: 0 0 24px; }
 label.wajib::after, legend.wajib::after { content: " *"; content: " *" / ""; }
+.kembali:hover { color: var(--utama-hover); }
 .kembali {
   min-height: 44px; margin: 0 0 8px; padding: 0 8px 0 0; border: 0; background: none;
   font: inherit; font-weight: 600; color: var(--utama); text-decoration: underline; cursor: pointer;
@@ -133,6 +139,7 @@ input[type="text"], input[type="number"], input[type="date"], select, textarea {
   font: inherit; font-size: 16px;
 }
 textarea { min-height: 120px; resize: vertical; }
+:is(input[type="text"], input[type="number"], input[type="date"], select, textarea):focus:not([aria-invalid="true"]) { border-color: var(--utama); }
 ::placeholder { color: var(--teks-redup); opacity: 1; }
 .hitung { text-align: right; }
 
@@ -191,6 +198,62 @@ textarea { min-height: 120px; resize: vertical; }
 /* FAQ */
 .faq dt { font-weight: 700; color: var(--utama); margin-top: 16px; }
 .faq dd { margin: 4px 0 0; }
+
+/* Gerak: hanya bila pengguna tidak meminta gerak dikurangi. Semua keyframe hanya punya "from",
+   jadi tanpa animasi elemen tampil normal. Hanya transform, opacity, stroke-dashoffset, dan transisi warna. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes naik { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes masuk-maju { from { opacity: 0; transform: translateX(16px); } }
+  @keyframes masuk-mundur { from { opacity: 0; transform: translateX(-16px); } }
+  @keyframes muncul { from { opacity: 0; transform: translateY(-6px); } }
+  @keyframes pudar { from { opacity: 0; } }
+  @keyframes sorot { from { opacity: .8; } to { opacity: 0; } }
+  @keyframes panel-muncul { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes gambar { from { stroke-dashoffset: 1; } }
+
+  /* 1. Pembukaan */
+  #pembuka > * { animation: naik 250ms ease-out backwards; }
+  #pembuka > :nth-child(2) { animation-delay: 50ms; }
+  #pembuka > :nth-child(3) { animation-delay: 100ms; }
+
+  /* 2. Pindah langkah (data-arah diisi app.js; langkah 1 saat halaman dibuka tidak bergerak) */
+  form[data-arah="maju"] [data-langkah]:not([hidden]) { animation: masuk-maju 200ms ease-out backwards; }
+  form[data-arah="mundur"] [data-langkah]:not([hidden]) { animation: masuk-mundur 200ms ease-out backwards; }
+
+  /* 3. Bilah kemajuan */
+  .penunjuk li::after { transition: transform 250ms ease-out, background-color 200ms ease-out; }
+
+  /* 4. Kolom dinamis (.baru diisi app.js) */
+  .isian.baru { animation: muncul 180ms ease-out backwards; }
+
+  /* 5. Tombol */
+  .tombol { transition: background-color 120ms ease-out, color 120ms ease-out, transform 120ms ease-out; }
+  .tombol:active:not(:disabled):not([aria-disabled="true"]) { transform: scale(.98); }
+  .kembali, .segmented label { transition: background-color 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out; }
+
+  /* 6. Kolom isian: hanya border; garis fokus (outline) tidak ditunda */
+  input[type="text"], input[type="number"], input[type="date"], select, textarea { transition: border-color 150ms ease-out; }
+
+  /* 7. Pesan kesalahan */
+  .galat:not([hidden]) { animation: pudar 150ms ease-out backwards; }
+
+  /* 8. Sorotan kisaran estimasi: elemen .angka dibuat baru tiap angka berubah, jadi animasi mulai sendiri */
+  .estimasi .angka { position: relative; isolation: isolate; }
+  .estimasi .angka::before {
+    content: ""; position: absolute; inset: -2px -6px; z-index: -1; border-radius: 6px;
+    background: var(--peringatan); opacity: 0; animation: sorot 250ms ease-out;
+  }
+
+  /* 10. Panel tercatat */
+  .panel:not([hidden]) { animation: panel-muncul 220ms ease-out backwards; }
+  .panel:not([hidden]) .centang-kirim path { animation: gambar 250ms ease-out 120ms backwards; }
+}
+
+/* 9. Bar HP naik halus saat pertama terlihat (.bar-masuk diisi app.js) */
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  @keyframes bar-naik { from { opacity: 0; transform: translateY(16px); } }
+  .bar.bar-masuk { animation: bar-naik 220ms ease-out backwards; }
+}
 
 /* Footer */
 .footer { border-top: 1px solid var(--garis); padding: 32px 0 48px; font-size: 14px; color: var(--teks-redup); }

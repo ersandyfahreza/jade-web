@@ -14,7 +14,13 @@
   form.addEventListener("focusin", (e) => {
     if (innerWidth <= 640 && !bar.contains(e.target)) e.target.scrollIntoView({ block: "nearest" });
   });
+  form.addEventListener("animationend", (e) => e.target.classList.remove("baru"));
   new ResizeObserver(() => document.documentElement.style.setProperty("--tinggi-bar", bar.offsetHeight + "px")).observe(bar);
+  // Gerak saja: bar naik halus saat pertama terlihat sepenuhnya. Tanpa kelas ini bar tampil normal
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((e) => { if (e[0].isIntersecting) { bar.classList.add("bar-masuk"); io.disconnect(); } }, { threshold: 1 });
+    io.observe(bar);
+  }
 
   // Pesan kesalahan resmi (SPEC layar Bagian 9)
   const PESAN = {
@@ -172,6 +178,7 @@
       const w = pembungkus(f);
       const tadiSembunyi = w.hidden;
       w.hidden = !adaField(f);
+      w.classList.toggle("baru", !w.hidden && (tadiSembunyi || w.classList.contains("baru"))); // hanya untuk gerak muncul; dilepas saat animasi selesai
       // Tanpa lampiran, total halaman dianggap 0; saat muncul lagi dikosongkan
       if (f.id === "total-hlm") {
         if (w.hidden) $(f.id).value = "0";
@@ -275,6 +282,7 @@
   }
 
   function tampilLangkah(i, awal = false) {
+    if (!awal) form.dataset.arah = i < kini ? "mundur" : "maju"; // hanya untuk arah gerak
     kini = i;
     form.querySelectorAll("[data-langkah]").forEach((s) => (s.hidden = Number(s.dataset.langkah) !== i));
     [...penunjuk.children].forEach((li, n) => {
@@ -418,6 +426,7 @@
       $("wa-lagi").href = tautan;
       $("salin-status").textContent = "";
       $("salin-manual").hidden = true;
+      $("panel-kirim").classList.toggle("belum-tercatat", !kodeServer); // centang hanya bila tercatat
       $("panel-kirim").hidden = false;
     } finally {
       window.location.href = tautan;
