@@ -40,10 +40,16 @@
   <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
   <tbody id="baris5"></tbody>
 </table>
+<h2>Pemetaan kolom ke langkah wizard (langkah.js dan index.html)</h2>
+<table>
+  <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
+  <tbody id="baris6"></tbody>
+</table>
 <script src="../data/fallback.js"></script>
 <script src="../assets/js/muat-config.js"></script>
 <script src="../assets/js/pricing.js"></script>
 <script src="../assets/js/pesan.js"></script>
+<script src="../assets/js/langkah.js"></script>
 <script>
   // Angka diharapkan disalin dari docs/RENCANA_UJI.md Bagian 1. Jangan diubah; perbaiki pricing.js.
   // [no, jenjang, tugas, target, lampiran, sisaHari, format, sitasi, penjelasan, bawah, atas]
@@ -246,13 +252,41 @@
     ].map(([no, nama, harap, hasil]) => [no, nama, harap, hasil, harap === hasil]);
   }
 
-  ujiMuat().catch((e) => [["M0", "Menjalankan uji muatConfig (buka lewat http://localhost:8000)", "jalan", "error: " + e.message, false]]).then((baris5) => {
+  // Bagian 6: setiap kolom form ada di tepat satu langkah. Membaca index.html yang asli, jadi harus dibuka lewat server.
+  async function ujiLangkah() {
+    const doc = new DOMParser().parseFromString(await (await fetch("../index.html")).text(), "text/html");
+    const kontrol = [...doc.querySelectorAll("form input, form select, form textarea")]
+      // Kolom jebakan dan kotak salin-manual (readonly, bukan isian klien) memang di luar langkah
+      .filter((el) => el.type !== "hidden" && el.name !== "website" && !el.readOnly);
+    const kolomForm = [...new Set(kontrol.map((el) => (el.type === "radio" ? el.name : el.id)))];
+    const semua = LANGKAH.flatMap((l) => l.kolom);
+    const jumlah = (id) => semua.filter((x) => x === id).length;
+    const tanpa = kolomForm.filter((id) => jumlah(id) === 0);
+    const ganda = kolomForm.filter((id) => jumlah(id) > 1);
+    const asing = semua.filter((id) => !kolomForm.includes(id));
+    const hasilKosong = (a) => (a.length ? a.join(",") : "tidak ada");
+    return [
+      ["WZ1", "Kolom form tanpa langkah", "tidak ada", hasilKosong(tanpa)],
+      ["WZ2", "Kolom di lebih dari satu langkah", "tidak ada", hasilKosong(ganda)],
+      ["WZ3", "Langkah menyebut kolom yang tidak ada di form", "tidak ada", hasilKosong(asing)],
+      ["WZ4", "Kolom jebakan website tidak ada di langkah mana pun", "tidak ada", semua.includes("website") ? "ada" : "tidak ada"],
+      ["WZ5", "Empat langkah, judul dan kalimat penjelas terisi", "4", String(LANGKAH.filter((l) => l.judul && l.penjelas && l.kolom.length).length)],
+      ["WZ6", "Tidak ada atribut required native (form novalidate)", "0", String(doc.querySelectorAll("form [required]").length)],
+      ["WZ7", "Setiap langkah punya pembungkus data-langkah di form", "4", String(doc.querySelectorAll("form [data-langkah]").length)]
+    ].map(([no, nama, harap, hasil]) => [no, nama, harap, hasil, harap === hasil]);
+  }
+
+  Promise.all([
+    ujiMuat().catch((e) => [["M0", "Menjalankan uji muatConfig (buka lewat http://localhost:8000)", "jalan", "error: " + e.message, false]]),
+    ujiLangkah().catch((e) => [["WZ0", "Menjalankan uji pemetaan langkah (buka lewat http://localhost:8000)", "jalan", "error: " + e.message, false]])
+  ]).then(([baris5, baris6]) => {
     isiTabel("baris", baris);
     isiTabel("baris2", baris2);
     isiTabel("baris3", baris3);
     isiTabel("baris4", baris4);
     isiTabel("baris5", baris5);
-    const semua = baris.concat(baris2, baris3, baris4, baris5);
+    isiTabel("baris6", baris6);
+    const semua = baris.concat(baris2, baris3, baris4, baris5, baris6);
     const gagal = semua.filter((b) => !b[4]).length;
     document.getElementById("ringkas").textContent = gagal ? `${gagal} dari ${semua.length} baris CEK.` : `Semua ${semua.length} baris OK.`;
   });

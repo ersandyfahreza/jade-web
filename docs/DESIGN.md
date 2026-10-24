@@ -56,8 +56,12 @@ Mode gelap tidak dibuat di versi 1.
 | Pilihan jenjang | Dua tombol besar berdampingan (segmented). Yang terpilih: latar `--utama`, teks putih |
 | Kolom isian | Latar putih, garis `--garis-input` 1 px, tinggi minimal 44 px. Label **selalu di atas** kolom, tidak hanya placeholder |
 | Fokus | Garis tebal 3 px `--utama` dengan jarak 2 px. Tidak boleh dihilangkan |
-| Kartu estimasi | Latar putih, garis `--utama` 2 px. Angka kisaran warna `--aksen`. Di HP tampil **menempel di bawah layar** (sticky) bersama tombol kirim |
-| Tombol utama | "Kirim ke WhatsApp": latar `--utama`, teks putih, tinggi 48 px, lebar penuh di HP |
+| Penunjuk langkah | Bilah 4 segmen (tinggi 4 px, jarak 4 px, sudut membulat) di atas teks "Langkah X dari 4" (14 px, `--teks-redup`) dan judul langkah (20 px, tebal, `--utama`). Segmen yang sudah lewat dan yang aktif berwarna `--utama`, sisanya `--garis`. Segmen aktif lebih tebal (8 px) supaya tidak hanya bergantung pada warna. Tidak bisa diklik, tidak ada animasi |
+| Bar tunggal (estimasi + tombol) | Satu-satunya bar, **menempel di bawah layar HP**: angka kisaran warna `--aksen` (24 px tebal di HP, 28 px di layar lebar), peringatan ringkas 14 px, lalu tombol Lanjut atau Kirim. Latar `--latar`, garis atas 1 px `--garis`, tanpa bingkai kartu. Tinggi di 360 x 640 harus kurang dari 25% layar. Catatan panjang (tugas lainnya, tenggat hari ini) tidak masuk bar |
+| Kembali | Tombol bergaya tautan: teks `--utama` tebal bergaris bawah, tinggi sentuh 44 px, di dalam kartu di bawah isi langkah |
+| Ringkasan | Daftar label (14 px, `--teks-redup`) dan nilai (tebal) dengan garis pemisah 1 px `--garis`, nilai boleh turun baris |
+| Tanda wajib | Tanda * setelah label kolom wajib (dibuat CSS, tidak dibaca pembaca layar; kolom diberi `aria-required`) |
+| Tombol utama | "Lanjut" dan "Kirim ke WhatsApp": latar `--utama`, teks putih, tinggi 48 px, lebar penuh di HP |
 | Tombol non-aktif | Latar `--garis`, teks `--teks` (kontras ± 7,7:1; `--teks-redup` hanya ± 3,8:1 di atas `--garis`), kursor tidak boleh |
 | Kotak peringatan | Latar putih, garis kiri 4 px `--aksen`, teks `--teks` |
 | Pesan error | Teks `--error` di bawah kolom, dengan ikon tanda seru. Warna **bukan satu-satunya** penanda |

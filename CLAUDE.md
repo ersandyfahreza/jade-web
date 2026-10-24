@@ -39,6 +39,7 @@ jade-web/
     js/config.js        (URL Apps Script, nomor WhatsApp, batas waktu)
     js/pricing.js       (fungsi hitung estimasi, tanpa akses ke halaman)
     js/app.js           (form, tampilan, WhatsApp, kirim ke Sheets)
+    js/langkah.js       (pemetaan kolom ke 4 langkah wizard form)
   data/fallback.js      (salinan tugas dan harga untuk cadangan)
   apps-script/Code.gs   (salinan kode Apps Script, untuk dokumentasi)
   tests/uji-harga.html  (halaman uji hitung, buka di browser)
