@@ -1,7 +1,8 @@
 // Form Jade: tampil/sembunyi isian, nilai awal dari jenis tugas, validasi, dan kartu estimasi.
 // Harga dan daftar tugas dibaca dari config, tidak ditulis di sini. Rumus ada di pricing.js.
-(function () {
-  const config = FALLBACK_CONFIG; // Tahap 5: diganti config dari Apps Script
+(async function () {
+  // Form menunggu config (maks 8 detik, lihat muat-config.js); sampai itu form dikunci lewat atribut inert
+  const { config, gagal } = await muatConfig();
   const $ = (id) => document.getElementById(id);
   const form = document.querySelector("form.kartu");
   const tombolKirim = form.querySelector('button[type="submit"]');
@@ -279,6 +280,11 @@
     s.textContent = nilai.toLocaleString("id-ID");
   });
 
+  if (gagal) {
+    $("data-gagal").textContent = PESAN.hargaGagal;
+    $("data-gagal").hidden = false;
+  }
   isiJenis();
   perbarui();
+  form.inert = false;
 })();

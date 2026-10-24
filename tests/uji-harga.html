@@ -30,7 +30,18 @@
   <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
   <tbody id="baris3"></tbody>
 </table>
+<h2>Pemeriksaan config dari Sheets</h2>
+<table>
+  <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
+  <tbody id="baris4"></tbody>
+</table>
+<h2>Memuat config (muatConfig, fetch dan localStorage palsu)</h2>
+<table>
+  <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
+  <tbody id="baris5"></tbody>
+</table>
 <script src="../data/fallback.js"></script>
+<script src="../assets/js/muat-config.js"></script>
 <script src="../assets/js/pricing.js"></script>
 <script src="../assets/js/pesan.js"></script>
 <script>
@@ -147,6 +158,27 @@
       potongTeks("\u{1F600}".repeat(400), "K1").includes("selengkapnya") ? "dipotong" : "tanpa keterangan"]
   ].map(([no, nama, harap, hasil]) => [no, nama, String(harap), String(hasil), String(harap) === String(hasil)]);
 
+  // Bagian 4: validasiConfig (Tahap 5). Config rusak harus "gagal", config fallback harus "lolos".
+  const salin = (ubah) => { const c = JSON.parse(JSON.stringify(FALLBACK_CONFIG)); ubah(c); return validasiConfig(c) ? "gagal" : "lolos"; };
+  const baris4 = [
+    ["V1", "Config fallback", "lolos", salin(() => {})],
+    ["V2", "ok:false dari Apps Script", "gagal", salin((c) => { c.ok = false; })],
+    ["V3", "Jenjang Pelajar tanpa tugas", "gagal", salin((c) => { c.tugas = c.tugas.filter((t) => t.jenjang !== "Pelajar"); })],
+    ["V4", "Harga dasar bukan angka", "gagal", salin((c) => { c.tugas[0].hargaDasar = "abc"; })],
+    ["V5", "Unit 0", "gagal", salin((c) => { c.tugas[0].unit = 0; })],
+    ["V6", "Format standar tidak sah", "gagal", salin((c) => { c.tugas[0].formatStandar = "Docx"; })],
+    ["V7", "blokLampiran 0", "gagal", salin((c) => { c.harga.blokLampiran = 0; })],
+    ["V8", "pembulatan 0", "gagal", salin((c) => { c.harga.pembulatan = 0; })],
+    ["V9", "pengaliAtas null", "gagal", salin((c) => { c.harga.pengaliAtas = null; })],
+    ["V10", "Tabel tenggat kosong", "gagal", salin((c) => { c.harga.tenggat = []; })],
+    ["V11", "Tabel tenggat tidak terurut", "gagal", salin((c) => { c.harga.tenggat.reverse(); })],
+    ["V12", "Baris pertama tenggat minHari 1", "gagal", salin((c) => { c.harga.tenggat[0].minHari = 1; })],
+    ["V13", "Pengali tenggat bukan angka", "gagal", salin((c) => { c.harga.tenggat[1].pengali = "x"; })],
+    ["V14", "Config null tidak membuat error", "gagal", validasiConfig(null) ? "gagal" : "lolos"],
+    ["V15", "Jenjang + tugas ganda", "gagal", salin((c) => { c.tugas.push(Object.assign({}, c.tugas[0])); })],
+    ["V16", "Tugas sama beda jenjang tetap sah", "lolos", salin((c) => { c.tugas.push(Object.assign({}, c.tugas[0], { jenjang: "Pelajar" })); })]
+  ].map(([no, nama, harap, hasil]) => [no, nama, harap, hasil, harap === hasil]);
+
   function isiTabel(id, data) {
     const tbody = document.getElementById(id);
     data.forEach(([no, nama, harap, hasil, ok]) => {
@@ -157,12 +189,46 @@
       s.className = ok ? "OK" : "CEK";
     });
   }
-  isiTabel("baris", baris);
-  isiTabel("baris2", baris2);
-  isiTabel("baris3", baris3);
-  const semua = baris.concat(baris2, baris3);
-  const gagal = semua.filter((b) => !b[4]).length;
-  document.getElementById("ringkas").textContent = gagal ? `${gagal} dari ${semua.length} baris CEK.` : `Semua ${semua.length} baris OK.`;
+  // Bagian 5: muatConfig dijalankan di salinan terpisah dengan CONFIG, fetch, dan localStorage palsu,
+  // jadi localStorage asli (dan salinan harga di browser ini) tidak tersentuh. Hasil: "sumber|pesanGagal|disimpan".
+  async function ujiMuat() {
+    const kode = await (await fetch("../assets/js/muat-config.js")).text();
+    const dariSheets = Object.assign({}, FALLBACK_CONFIG, { versi: "dari-sheets" });
+    const salinan = (jam) => ({ waktu: Date.now() - jam * 3600e3, config: Object.assign({}, FALLBACK_CONFIG, { versi: "dari-salinan" }) });
+    const rusak = Object.assign({}, FALLBACK_CONFIG, { versi: "rusak", harga: Object.assign({}, FALLBACK_CONFIG.harga, { pembulatan: 0 }) });
+    const jalan = async (sheets, simpanan) => {
+      const toko = simpanan ? { jade_config: JSON.stringify(simpanan) } : {};
+      const palsu = {
+        getItem: (k) => (k in toko ? toko[k] : null),
+        setItem: (k, v) => { toko[k] = v; }
+      };
+      const fetchPalsu = async () => { if (sheets === "putus") throw new Error("putus"); return { json: async () => sheets }; };
+      const muat = new Function("CONFIG", "FALLBACK_CONFIG", "fetch", "localStorage", kode + "\nreturn muatConfig;")(
+        { appsScriptUrl: "https://contoh/exec", batasWaktuMs: 8000 }, FALLBACK_CONFIG, fetchPalsu, palsu);
+      const r = await muat();
+      const tersimpan = toko.jade_config ? JSON.parse(toko.jade_config).config.versi : "-";
+      return `${r.config.versi === FALLBACK_CONFIG.versi ? "fallback" : r.config.versi}|pesan=${r.gagal ? "ya" : "tidak"}|simpan=${tersimpan}`;
+    };
+    return [
+      ["M1", "Sheets berhasil: pakai Sheets dan simpan salinan", "dari-sheets|pesan=tidak|simpan=dari-sheets", await jalan(dariSheets, null)],
+      ["M2", "Sheets gagal, salinan 1 jam: pakai salinan", "dari-salinan|pesan=tidak|simpan=dari-salinan", await jalan("putus", salinan(1))],
+      ["M3", "Sheets gagal, salinan 25 jam: diabaikan, fallback + pesan", "fallback|pesan=ya|simpan=dari-salinan", await jalan("putus", salinan(25))],
+      ["M4", "Sheets gagal, tanpa salinan: fallback + pesan", "fallback|pesan=ya|simpan=-", await jalan("putus", null)],
+      ["M5", "Config Sheets tidak lolos, tanpa salinan: tidak disimpan, fallback + pesan", "fallback|pesan=ya|simpan=-", await jalan(rusak, null)],
+      ["M6", "Config Sheets tidak lolos, salinan 1 jam: salinan dipakai dan tidak ditimpa", "dari-salinan|pesan=tidak|simpan=dari-salinan", await jalan(rusak, salinan(1))]
+    ].map(([no, nama, harap, hasil]) => [no, nama, harap, hasil, harap === hasil]);
+  }
+
+  ujiMuat().catch((e) => [["M0", "Menjalankan uji muatConfig (buka lewat http://localhost:8000)", "jalan", "error: " + e.message, false]]).then((baris5) => {
+    isiTabel("baris", baris);
+    isiTabel("baris2", baris2);
+    isiTabel("baris3", baris3);
+    isiTabel("baris4", baris4);
+    isiTabel("baris5", baris5);
+    const semua = baris.concat(baris2, baris3, baris4, baris5);
+    const gagal = semua.filter((b) => !b[4]).length;
+    document.getElementById("ringkas").textContent = gagal ? `${gagal} dari ${semua.length} baris CEK.` : `Semua ${semua.length} baris OK.`;
+  });
 </script>
 </body>
 </html>

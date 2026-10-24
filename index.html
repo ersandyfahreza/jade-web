@@ -40,7 +40,8 @@
   <section id="form">
     <h2 class="sr-only">Form pesanan</h2>
     <!-- Kerangka saja: belum berfungsi (Tahap 2 dan seterusnya) -->
-    <form class="kartu" novalidate>
+    <p class="kotak-peringatan" id="data-gagal" role="status" hidden></p>
+    <form class="kartu" novalidate inert>
 
       <fieldset>
         <legend>Jenjang</legend>
@@ -253,6 +254,7 @@
 
 <script src="assets/js/config.js"></script>
 <script src="data/fallback.js"></script>
+<script src="assets/js/muat-config.js"></script>
 <script src="assets/js/pricing.js"></script>
 <script src="assets/js/pesan.js"></script>
 <script src="assets/js/app.js"></script>
