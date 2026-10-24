@@ -215,7 +215,7 @@ Cara cek: masukkan kasus yang sama ke tab **Kalkulator** di spreadsheet dan band
 6. `[ ]` Nama bisnis final dan alamat web.
 7. `[ ]` Menghindari logo atau nama Claude di tampilan bisnis (usulan: ya; cukup tulis "dibantu AI").
 8. `[ ]` Cara berdua mengakses satu nomor WhatsApp (WhatsApp Business di dua perangkat, atau bergantian) dan siapa yang menjaga nomor itu tiap hari.
-9. `[x]` Palet warna dari tim: `#F2F0EF`, `#BBBDBC`, `#245F73`, `#733E24` (peran tiap warna di `DESIGN.md`). Kode awal `#F2FOEF` mengandung huruf O, diasumsikan `#F2F0EF` `[ ]` konfirmasi.
+9. `[x]` Palet warna dari tim: `#F2F0EF`, `#BBBDBC`, `#245F73`, `#733E24` (peran tiap warna di `DESIGN.md`).
 
 ---
 

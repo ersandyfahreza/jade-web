@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uji Hitung Harga Jade</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 16px; color: #1E2B30; background: #F2F0EF; }
+  table { border-collapse: collapse; width: 100%; background: #fff; }
+  th, td { border: 1px solid #BBBDBC; padding: 6px 8px; text-align: left; font-size: 14px; }
+  .OK { color: #1B6B2F; font-weight: 700; }
+  .CEK { color: #B3261E; font-weight: 700; }
+  #ringkas { font-weight: 700; margin: 12px 0; }
+</style>
+</head>
+<body>
+<h1>Uji hitung harga</h1>
+<p id="ringkas"></p>
+<table>
+  <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
+  <tbody id="baris"></tbody>
+</table>
+<h2>Sisa hari dan label tenggat</h2>
+<table>
+  <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
+  <tbody id="baris2"></tbody>
+</table>
+<script src="../data/fallback.js"></script>
+<script src="../assets/js/pricing.js"></script>
+<script>
+  // Angka diharapkan disalin dari docs/RENCANA_UJI.md Bagian 1. Jangan diubah; perbaiki pricing.js.
+  // [no, jenjang, tugas, target, lampiran, sisaHari, format, sitasi, penjelasan, bawah, atas]
+  const KASUS = [
+    ["1", "Mahasiswa", "Draf makalah", 8, 30, 4, "PDF", true, false, 88000, 106000],
+    ["2", "Pelajar", "PPT presentasi", 12, 10, 6, "PPT", false, false, 21000, 26000],
+    ["3", "Mahasiswa", "Olah data + interpretasi", 3, 5, 1, "Excel", false, true, 64000, 77000],
+    ["4", "Mahasiswa", "Tugas lainnya", 4, 0, 6, "Teks", false, false, 30000, 60000],
+    ["5", "Pelajar", "Draf makalah/laporan observasi", 6, 45, 2, "Teks", true, false, 70000, 84000],
+    ["A", "Mahasiswa", "Ringkasan materi/jurnal", 2, 20, 5, "Teks", false, false, 10000, 12000],
+    ["B", "Mahasiswa", "Ringkasan materi/jurnal", 2, 21, 5, "Teks", false, false, 13000, 16000],
+    ["C", "Mahasiswa", "Ringkasan materi/jurnal", 2, 31, 5, "Teks", false, false, 16000, 20000],
+    ["D", "Pelajar", "Kerangka karangan/esai", 1, 0, 0, "Teks", false, false, 11000, 14000],
+    ["E", "Mahasiswa", "Coding tugas kecil", 3, 0, 3, "Teks", false, false, 121000, 146000],
+    ["G", "Mahasiswa", "Draf makalah", 3, 0, 6, "Teks", false, false, 40000, 48000],
+    ["H", "Pelajar", "Tugas lainnya", 2, 0, 5, "Teks", false, false, 16000, 32000],
+    ["I", "Mahasiswa", "Draf makalah", 5, 0, 6, "Word", false, false, 40000, 48000],
+    ["J", "Mahasiswa", "Draf makalah", 5, 0, 6, "PDF", false, false, 45000, 54000]
+  ];
+  const rp = (n) => "Rp" + n.toLocaleString("id-ID");
+  const dasar = { jenjang: "Mahasiswa", tugas: "Draf makalah", target: 5, halaman: 0, sisaHari: 6, format: "Word", sitasi: false, penjelasan: false };
+  const baris = [];
+
+  KASUS.forEach(([no, jenjang, tugas, target, halaman, sisaHari, format, sitasi, penjelasan, bawah, atas]) => {
+    const r = hitungEstimasi(FALLBACK_CONFIG, { jenjang, tugas, target, halaman, sisaHari, format, sitasi, penjelasan });
+    const ok = r.status === "ok" && r.bawah === bawah && r.atas === atas;
+    baris.push([no, `${jenjang} - ${tugas}`, `${rp(bawah)} - ${rp(atas)}`, r.status === "ok" ? `${rp(r.bawah)} - ${rp(r.atas)}` : r.status, ok]);
+  });
+
+  // Kasus perilaku K, L, M (tanpa angka)
+  [
+    ["K", "Lampiran 101 hlm", "hubungi", { halaman: 101 }, (r) => r.status === "hubungi"],
+    ["L", "Tenggat kemarin (sisa -1)", "tidakBisa: tenggat", { sisaHari: -1 }, (r) => r.status === "tidakBisa" && r.alasan === "tenggat"],
+    ["M", "Target 0", "tidakBisa: target", { target: 0 }, (r) => r.status === "tidakBisa" && r.alasan === "target"],
+    ["M", "Target 201", "tidakBisa: target", { target: 201 }, (r) => r.status === "tidakBisa" && r.alasan === "target"]
+  ].forEach(([no, nama, harap, ubah, cek]) => {
+    const r = hitungEstimasi(FALLBACK_CONFIG, Object.assign({}, dasar, ubah));
+    baris.push([no, nama, harap, r.status + (r.alasan ? ": " + r.alasan : ""), cek(r)]);
+  });
+
+  // Bagian 2: sisa hari (Asia/Jakarta), label tenggat, dan tabel tenggat rusak. [no, kasus, diharapkan, hasil]
+  const tanpaBaris0 = { tugas: FALLBACK_CONFIG.tugas, harga: Object.assign({}, FALLBACK_CONFIG.harga, { tenggat: [{ minHari: 3, pengali: 1.1 }] }) };
+  const hariIniTes = hitungEstimasi(tanpaBaris0, Object.assign({}, dasar, { sisaHari: 0 }));
+  const baris2 = [
+    ["S1", "Hari yang sama", 0, hitungSisaHari("2026-10-24", "2026-10-24")],
+    ["S2", "Besok", 1, hitungSisaHari("2026-10-25", "2026-10-24")],
+    ["S3", "Pergantian bulan (31 Okt ke 1 Nov)", 1, hitungSisaHari("2026-11-01", "2026-10-31")],
+    ["S4", "Tenggat kosong", "NaN", String(hitungSisaHari("", "2026-10-24"))],
+    ["S5", "Jakarta: 31 Okt 16:59 UTC", "2026-10-31", tanggalJakarta(new Date("2026-10-31T16:59:00Z"))],
+    ["S6", "Jakarta: 31 Okt 17:00 UTC sudah 1 Nov", "2026-11-01", tanggalJakarta(new Date("2026-10-31T17:00:00Z"))],
+    ["L0", "Label sisa 0 hari", "Sisa 0 hari. Tenggat 0 hari: biaya x1,5", labelTenggat(FALLBACK_CONFIG, 0)],
+    ["L1", "Label sisa 1 hari", "Sisa 1 hari. Tenggat 1-2 hari: biaya x1,25", labelTenggat(FALLBACK_CONFIG, 1)],
+    ["L2", "Label sisa 2 hari", "Sisa 2 hari. Tenggat 1-2 hari: biaya x1,25", labelTenggat(FALLBACK_CONFIG, 2)],
+    ["L3", "Label sisa 3 hari", "Sisa 3 hari. Tenggat 3-4 hari: biaya x1,1", labelTenggat(FALLBACK_CONFIG, 3)],
+    ["L4", "Label sisa 4 hari", "Sisa 4 hari. Tenggat 3-4 hari: biaya x1,1", labelTenggat(FALLBACK_CONFIG, 4)],
+    ["L5", "Label sisa 5 hari (tanpa faktor)", "Sisa 5 hari", labelTenggat(FALLBACK_CONFIG, 5)],
+    ["L6", "Label sisa 30 hari (tanpa faktor)", "Sisa 30 hari", labelTenggat(FALLBACK_CONFIG, 30)],
+    ["L7", "Label tenggat kosong", "", labelTenggat(FALLBACK_CONFIG, NaN)],
+    ["T1", "Tabel tenggat tanpa baris 0, sisa 0", "tidakBisa: aturanTenggat", hariIniTes.status + ": " + hariIniTes.alasan]
+  ].map(([no, nama, harap, hasil]) => [no, nama, String(harap), String(hasil), String(harap) === String(hasil)]);
+
+  function isiTabel(id, data) {
+    const tbody = document.getElementById(id);
+    data.forEach(([no, nama, harap, hasil, ok]) => {
+      const tr = tbody.insertRow();
+      [no, nama, harap, hasil].forEach((v) => (tr.insertCell().textContent = v));
+      const s = tr.insertCell();
+      s.textContent = ok ? "OK" : "CEK";
+      s.className = ok ? "OK" : "CEK";
+    });
+  }
+  isiTabel("baris", baris);
+  isiTabel("baris2", baris2);
+  const semua = baris.concat(baris2);
+  const gagal = semua.filter((b) => !b[4]).length;
+  document.getElementById("ringkas").textContent = gagal ? `${gagal} dari ${semua.length} baris CEK.` : `Semua ${semua.length} baris OK.`;
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-// Form Jade: tampil/sembunyi isian, nilai awal dari jenis tugas, dan validasi.
-// Estimasi belum dihitung (Tahap 3). Harga dan daftar tugas dibaca dari config, tidak ditulis di sini.
+// Form Jade: tampil/sembunyi isian, nilai awal dari jenis tugas, validasi, dan kartu estimasi.
+// Harga dan daftar tugas dibaca dari config, tidak ditulis di sini. Rumus ada di pricing.js.
 (function () {
   const config = FALLBACK_CONFIG; // Tahap 5: diganti config dari Apps Script
   const $ = (id) => document.getElementById(id);
@@ -14,7 +14,8 @@
     pendek: (n) => `Tulis minimal ${n} karakter.`,
     panjang: (n) => `Maksimal ${n} karakter.`,
     tenggat: "Tenggat tidak boleh sebelum hari ini.",
-    setuju: "Centang dulu persetujuan ini untuk melanjutkan."
+    setuju: "Centang dulu persetujuan ini untuk melanjutkan.",
+    hargaGagal: "Harga terbaru belum bisa dimuat, kami pakai data cadangan. Harga final tetap kami konfirmasi lewat WhatsApp."
   };
 
   const jenjang = () => {
@@ -25,7 +26,7 @@
     config.tugas.find((t) => t.jenjang === jenjang() && t.tugas === $("jenis").value);
   const tugasLainnya = () => $("jenis").value === "Tugas lainnya";
   // Tanggal hari ini zona Asia/Jakarta, format YYYY-MM-DD
-  const hariIni = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+  const hariIni = () => tanggalJakarta(new Date());
 
   // ada: kapan isian tampil dan ikut diperiksa
   const FIELDS = [
@@ -94,7 +95,49 @@
     elemen(f).setAttribute("aria-invalid", pesan ? "true" : "false");
   }
 
-  function perbarui() {
+  const angkaIsian = (id) => ($(id).value.trim() !== "" ? Number($(id).value) : NaN);
+  const rupiah = (n) => "Rp" + n.toLocaleString("id-ID");
+  const kartu = form.querySelector(".estimasi [aria-live]");
+  let timerEstimasi;
+  let isiTerakhir;
+
+  function tampilkanEstimasi() {
+    const sisa = hitungSisaHari($("tenggat").value, hariIni());
+    const hasil = tugasTerpilih()
+      ? hitungEstimasi(config, {
+          jenjang: jenjang(), tugas: $("jenis").value, target: angkaIsian("target"),
+          halaman: jmlFileNol() ? 0 : angkaIsian("total-hlm"), sisaHari: sisa,
+          format: $("format").value, sitasi: $("sitasi").checked, penjelasan: $("penjelasan").checked
+        })
+      : null;
+    // Susun teks dulu; isi kartu hanya diganti jika berbeda, agar pembaca layar tidak membacakan ulang
+    const isi = [];
+    if (!hasil) isi.push(["pesan", "Pilih jenis tugas untuk melihat estimasi."]);
+    else if (hasil.status === "hubungi") {
+      isi.push(["pesan", `Lampiranmu lebih dari ${config.harga.batasLampiran} halaman. Harganya kami hitung manual, hubungi kami lewat WhatsApp.`]);
+    } else if (hasil.status === "tidakBisa" && hasil.alasan === "aturanTenggat") {
+      isi.push(["pesan", PESAN.hargaGagal]);
+    } else if (hasil.status === "ok") {
+      isi.push(["angka", `${rupiah(hasil.bawah)} - ${rupiah(hasil.atas)}`]);
+      if (hasil.lainnya) isi.push(["pesan", "Karena tugasnya di luar daftar, kisarannya lebih lebar. Harga pasti kami kabari setelah membaca kebutuhanmu."]);
+      if (hasil.hariIni) isi.push(["kotak-peringatan", "Tenggat hari ini perlu kami konfirmasi dulu, belum tentu bisa. Kami kabari lewat WhatsApp."]);
+    }
+    const kunci = JSON.stringify(isi);
+    if (kunci !== isiTerakhir) {
+      isiTerakhir = kunci;
+      kartu.replaceChildren(...isi.map(([kelas, teks]) => {
+        const p = document.createElement("p");
+        p.className = kelas;
+        p.textContent = teks;
+        return p;
+      }));
+    }
+    tombolKirim.textContent = hasil && hasil.status === "hubungi" ? "Hubungi kami lewat WhatsApp" : "Kirim ke WhatsApp";
+
+    $("tenggat-bantuan").textContent = labelTenggat(config, sisa);
+  }
+
+  function perbarui(tunda) {
     FIELDS.forEach((f) => {
       if (f.tipe === "radio") return;
       const w = pembungkus(f);
@@ -112,6 +155,10 @@
       h.textContent = `${ta.value.length}/${ta.maxLength}`;
     });
     tombolKirim.setAttribute("aria-disabled", FIELDS.every((f) => !adaField(f) || !periksa(f)) ? "false" : "true");
+    // Ketikan ditunda 150 ms agar tidak berat dan pembaca layar tidak kebanjiran
+    clearTimeout(timerEstimasi);
+    if (tunda === true) timerEstimasi = setTimeout(tampilkanEstimasi, 150);
+    else tampilkanEstimasi();
   }
 
   function isiJenis() {
@@ -153,7 +200,7 @@
     if (e.target.id) dipakai.add(e.target.id);
     perbarui();
   });
-  form.addEventListener("input", perbarui);
+  form.addEventListener("input", () => perbarui(true));
   form.addEventListener("focusout", (e) => {
     if (e.target.id) dipakai.add(e.target.id);
     perbarui();

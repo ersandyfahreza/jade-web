@@ -139,7 +139,8 @@
         <legend>Tenggat dan format</legend>
         <div class="isian">
           <label for="tenggat">Tenggat</label>
-          <input type="date" id="tenggat" name="tenggat">
+          <input type="date" id="tenggat" name="tenggat" aria-describedby="tenggat-bantuan">
+          <span class="bantuan" id="tenggat-bantuan"></span>
         </div>
         <div class="isian">
           <label for="format">Format output</label>
@@ -183,7 +184,7 @@
           </div>
           <p class="peringatan">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
         </div>
-        <button type="submit" class="tombol penuh" disabled>Kirim ke WhatsApp</button>
+        <button type="submit" class="tombol penuh" aria-disabled="true">Kirim ke WhatsApp</button>
       </div>
 
     </form>
@@ -242,6 +243,7 @@
 
 <script src="assets/js/config.js"></script>
 <script src="data/fallback.js"></script>
+<script src="assets/js/pricing.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

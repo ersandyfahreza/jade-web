@@ -24,7 +24,6 @@ Cara pakai: kerjakan **satu tahap per sesi** di Claude Code. Setiap tahap punya 
 | 4 | Pastikan Claude Code bisa dibuka di folder proyek | Perintah `claude` jalan di folder tersebut |
 | 5 | Pastikan akun Cloudflare masuk dan terhubung ke GitHub | Bisa membuat proyek Pages |
 | 6 | Impor `Template_Jade_Sheets.xlsx` ke Google Sheets dan tambah header `Semester` di AB1 tab Pesanan (lihat `SPEC_SHEETS_APPS_SCRIPT.md` Bagian 5, langkah 1-3) | Tab Contoh Uji, kolom Cocok, OK semua |
-| 7 | Konfirmasi kode warna `#F2F0EF` (kode awal tertulis dengan huruf O) dan nomor WhatsApp | PRD keputusan 9 dan 2 terjawab |
 
 **Tanda berhasil tahap 0:** semua baris di atas selesai.
 
