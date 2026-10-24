@@ -155,3 +155,7 @@ Laporkan hasil uji T1 sampai T10 dengan jujur.
 - Sebelum menjalankan prompt, pastikan tahap sebelumnya sudah lolos uji.
 - Jika Claude Code salah arah, hentikan dan minta ia membaca ulang `CLAUDE.md` dan dokumen yang relevan.
 - Kalau ada hal yang tidak dipahami, minta Claude Code menjelaskan dengan bahasa sederhana sebelum melanjutkan.
+
+Gunakan skill ui-ux-pro-max untuk menata hierarki, jarak, dan status komponen, tetapi warna dan
+huruf harus persis dari docs/DESIGN.md. Jangan mengganti palet dan jangan menambah efek yang
+tidak ada di DESIGN.md.

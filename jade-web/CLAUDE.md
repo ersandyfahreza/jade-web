@@ -68,3 +68,12 @@ jade-web/
 ## Git
 
 Commit kecil per tahap dengan pesan Indonesia singkat. Jangan commit file rahasia.
+
+## Alat bantu tambahan (jika terpasang)
+- Skill ui-ux-pro-max: boleh dipakai untuk saran tata letak, hierarki, status komponen, dan
+  aksesibilitas. Warna, huruf, dan jarak WAJIB mengikuti docs/DESIGN.md. Jika saran skill
+  bertentangan dengan DESIGN.md atau SPEC, DESIGN.md dan SPEC yang menang. Jangan membuat
+  berkas design-system baru tanpa izin.
+- Ponytail (jika terpasang): jangan memangkas fitur atau aturan yang tertulis di PRD, SPEC,
+  atau CLAUDE.md atas nama kesederhanaan (validasi, data cadangan, anti-spam, aksesibilitas,
+  uji, batas waktu).
