@@ -129,35 +129,48 @@ Tautan: `https://wa.me/6289619114292?text=` + isi pesan yang di-*encode* (`encod
 ```
 Halo Jade, aku mau pesan layanan pendampingan.
 
-Kode pesanan: {{kode}}
+*KODE PESANAN: {{kode}}*
+
+*Identitas*
 Jenjang: {{jenjang}}
 {{Prodi: ... / Kelas: ...}}
 {{Semester: ... (hanya mahasiswa)}}
 {{Mata kuliah / Mata pelajaran}}: {{...}}
+
+*Tugas*
 Jenis tugas: {{jenis_tugas}}
 Target output: {{target}} {{satuan}}
-Lampiran: {{jumlah_file}} file, total {{total_halaman}} hlm (akan kukirim di chat ini)
 Format output: {{format}}
 Tenggat: {{tanggal, contoh 28 Okt 2026}} ({{n}} hari lagi)
 Tambahan: {{daftar opsi, atau "tidak ada"}}
+Lampiran: {{jumlah_file}} file, total {{total_halaman}} hlm (akan kukirim di chat ini)
 
-Kebutuhan detail:
-{{teks, dipotong 400 karakter}}
+*Kebutuhan detail*
+> {{teks klien, dipotong 400 karakter, tiap baris diawali "> "}}
 
-Ketentuan tugas:
-{{teks, dipotong 400 karakter}}
+*Ketentuan tugas*
+> {{teks klien, dipotong 400 karakter, tiap baris diawali "> "}}
 
-Estimasi: Rp{{bawah}} - Rp{{atas}}
-(Estimasi awal, harga final menunggu konfirmasi dari kalian.)
+*ESTIMASI: Rp{{bawah}} - Rp{{atas}}*
+_Estimasi awal, harga final menunggu konfirmasi dari kalian._
 ```
 
+Gaya: satu baris kosong antar bagian. Tebal (*...*) hanya untuk judul bagian, baris kode pesanan, dan baris estimasi. Miring (_..._) hanya untuk keterangan estimasi dan catatan. Untuk Pelajar, baris "Kelas" menggantikan "Prodi" dan tidak ada baris "Semester".
+
 Aturan:
-1. Jika teks dipotong, tambahkan " ... (selengkapnya di pesanan {{kode}})". Teks lengkap sudah tersimpan di Sheets.
-2. Jika lampiran melebihi batas, baris Estimasi diganti: "Estimasi: tidak dihitung (lampiran lebih dari {{batasLampiran}} hlm), mohon dihitung manual."
-3. Jika Sheets gagal, tambahkan baris: "Catatan: pesanan belum tercatat otomatis."
+1. Jika teks dipotong, tambahkan " ... (selengkapnya di pesanan {{kode}})". Teks lengkap sudah tersimpan di Sheets. Pemotongan dihitung per karakter utuh (grafem, lewat `Intl.Segmenter`; cadangan `Array.from`), bukan per unit, agar emoji tidak rusak. Hitungan memakai teks asli, sebelum karakter lebar-nol disisipkan.
+2. Jika lampiran melebihi batas, baris estimasi diganti: "*ESTIMASI: tidak dihitung (lampiran lebih dari {{batasLampiran}} hlm), mohon dihitung manual.*"
+3. Jika Sheets gagal, tambahkan setelah satu baris kosong: "_Catatan: pesanan belum tercatat otomatis._"
 4. Tanggal ditulis format Indonesia (contoh "28 Okt 2026"). Angka uang memakai pemisah titik (contoh Rp88.000).
 5. Tidak ada nomor HP, alamat, atau data pribadi lain di pesan.
-6. Jika harga tidak bisa dihitung karena data harga bermasalah (bukan karena lampiran), baris Estimasi diganti: "Estimasi: tidak dihitung (data harga belum terbaca), mohon dihitung manual."
+6. Jika harga tidak bisa dihitung karena data harga bermasalah (bukan karena lampiran), baris estimasi diganti: "*ESTIMASI: tidak dihitung (data harga belum terbaca), mohon dihitung manual.*"
+7. **Netralisasi teks klien.** Teks klien tampil apa adanya tetapi tidak boleh memicu format WhatsApp (tebal, miring, coret, monospasi, daftar, kutipan). Caranya, dengan karakter lebar-nol (U+200B, tidak terlihat):
+   - Setiap karakter `*`, `_`, `~`, `` ` `` diapit karakter lebar-nol di kiri dan kanan. Berlaku juga untuk isian satu baris dari klien (prodi, mata kuliah, mata pelajaran, jenis tugas lainnya).
+   - Baris teks klien yang diawali "- ", "* ", "angka. ", atau ">" diberi karakter lebar-nol di depannya (setelah awalan "> ").
+   - Teks banyak baris tetap satu kutipan: tiap baris diawali "> ". Baris kosong ditulis "> " + karakter lebar-nol.
+   - Akhir baris `\r\n` diseragamkan menjadi `\n`.
+   - Risiko yang diterima: perilaku karakter lebar-nol belum diuji di semua versi WhatsApp (Android, iPhone, Web), dan karakter itu ikut tersalin bila admin menyalin teks klien. Bila masih ada yang terformat, ganti ke karakter lebar penuh (contoh ＊).
+8. Tombol "Salin pesan" menyalin teks yang sama persis dengan yang dikirim ke WhatsApp (variabel `pesanTerakhir`).
 
 ## 7. Daftar pilihan Pelajar
 

@@ -12,12 +12,26 @@ function tanggalIndonesia(ymd) {
 
 const rupiahWA = (n) => "Rp" + n.toLocaleString("id-ID");
 
+// Pecah per karakter utuh (grafem), agar emoji tidak terbelah dan encodeURIComponent tidak error.
+// Cadangan: Array.from bila Intl.Segmenter tidak ada.
+const pecahHuruf = (t) => (typeof Intl !== "undefined" && Intl.Segmenter
+  ? Array.from(new Intl.Segmenter().segment(t), (x) => x.segment) : Array.from(t));
+
 // Teks bebas klien dipotong 400 karakter; yang terpotong ditandai (teks lengkap ada di Sheets)
 function potongTeks(teks, kode) {
-  // Per karakter utuh (Array.from), agar emoji tidak terbelah dan encodeURIComponent tidak error
-  const huruf = Array.from(teks.trim());
+  const huruf = pecahHuruf(teks.replace(/\r\n?/g, "\n").trim());
   return huruf.length > BATAS_TEKS_WA ? `${huruf.slice(0, BATAS_TEKS_WA).join("")} ... (selengkapnya di pesanan ${kode})` : huruf.join("");
 }
+
+// Netralisasi format WhatsApp di teks klien: karakter lebar-nol (U+200B) memutus pasangan penanda dan awal daftar/kutipan.
+// shortcut: belum teruji di semua versi WhatsApp; bila masih terformat, ganti ke karakter lebar penuh.
+const LN = "​";
+const netralInline = (t) => t.replace(/[*_~`]/g, `${LN}$&${LN}`);
+const netralBaris = (b) => netralInline(/^\s*(?:[-*]\s|\d+\.\s|>)/.test(b) ? LN + b : b);
+
+// Teks banyak baris -> satu kutipan: tiap baris diawali "> ", baris kosong jadi "> " + lebar-nol
+const kutipan = (teks, kode) =>
+  potongTeks(teks, kode).split("\n").map((b) => "> " + (b.trim() ? netralBaris(b) : LN)).join("\n");
 
 // Kode sementara bila Sheets gagal: JD-OFF- + 4 huruf besar/angka
 function buatKodeSementara() {
@@ -34,34 +48,39 @@ const tautanWA = (nomor, pesan) => `https://wa.me/${nomor}?text=${encodeURICompo
 //      bawah, atas (null jika lampiran melebihi batas), hargaBelumTerbaca, batasLampiran, belumTercatat }
 function susunPesanWA(d) {
   const mhs = d.jenjang === "Mahasiswa";
-  const tambahan = [d.sitasi && "Sitasi diperiksa manual", d.penjelasan && "Penjelasan hasil"].filter(Boolean);
+  const tambahan = [d.sitasi && "Sitasi diperiksa", d.penjelasan && "Penjelasan hasil"].filter(Boolean);
+  const estimasi = d.hargaBelumTerbaca
+    ? "tidak dihitung (data harga belum terbaca), mohon dihitung manual."
+    : d.atas === null
+    ? `tidak dihitung (lampiran lebih dari ${d.batasLampiran} hlm), mohon dihitung manual.`
+    : `${rupiahWA(d.bawah)} - ${rupiahWA(d.atas)}`;
   const baris = [
     "Halo Jade, aku mau pesan layanan pendampingan.",
     "",
-    `Kode pesanan: ${d.kode}`,
+    `*KODE PESANAN: ${d.kode}*`,
+    "",
+    "*Identitas*",
     `Jenjang: ${d.jenjang}`,
-    ...(mhs ? [`Prodi: ${d.prodi}`, `Semester: ${d.semester}`, `Mata kuliah: ${d.matkul}`]
-      : [`Kelas: ${d.kelas}`, `Mata pelajaran: ${d.mapel}`]),
-    `Jenis tugas: ${d.jenisTugas}`,
+    ...(mhs ? [`Prodi: ${netralInline(d.prodi)}`, `Semester: ${d.semester}`, `Mata kuliah: ${netralInline(d.matkul)}`]
+      : [`Kelas: ${d.kelas}`, `Mata pelajaran: ${netralInline(d.mapel)}`]),
+    "",
+    "*Tugas*",
+    `Jenis tugas: ${netralInline(d.jenisTugas)}`,
     `Target output: ${d.target} ${d.satuan}`,
-    `Lampiran: ${d.jmlFile} file, total ${d.totalHlm} hlm (akan kukirim di chat ini)`,
     `Format output: ${d.format}`,
     `Tenggat: ${tanggalIndonesia(d.tenggat)} (${d.sisaHari} hari lagi)`,
     `Tambahan: ${tambahan.length ? tambahan.join(", ") : "tidak ada"}`,
+    `Lampiran: ${d.jmlFile} file, total ${d.totalHlm} hlm (akan kukirim di chat ini)`,
     "",
-    "Kebutuhan detail:",
-    potongTeks(d.kebutuhan, d.kode),
+    "*Kebutuhan detail*",
+    kutipan(d.kebutuhan, d.kode),
     "",
-    "Ketentuan tugas:",
-    potongTeks(d.ketentuan, d.kode),
+    "*Ketentuan tugas*",
+    kutipan(d.ketentuan, d.kode),
     "",
-    d.hargaBelumTerbaca
-      ? "Estimasi: tidak dihitung (data harga belum terbaca), mohon dihitung manual."
-      : d.atas === null
-      ? `Estimasi: tidak dihitung (lampiran lebih dari ${d.batasLampiran} hlm), mohon dihitung manual.`
-      : `Estimasi: ${rupiahWA(d.bawah)} - ${rupiahWA(d.atas)}`,
-    "(Estimasi awal, harga final menunggu konfirmasi dari kalian.)"
+    `*ESTIMASI: ${estimasi}*`,
+    "_Estimasi awal, harga final menunggu konfirmasi dari kalian._"
   ];
-  if (d.belumTercatat) baris.push("Catatan: pesanan belum tercatat otomatis.");
+  if (d.belumTercatat) baris.push("", "_Catatan: pesanan belum tercatat otomatis._");
   return baris.join("\n");
 }
