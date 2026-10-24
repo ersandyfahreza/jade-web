@@ -8,6 +8,8 @@ Halaman `tests/uji-harga.html` memuat semua baris di bawah, menghitung dengan `p
 
 Uji logika server (validasi, awalan `'`, kolom jebakan, kode pesanan, duplikat): jalankan `node tests/uji-server.js`. Semua baris harus OK.
 
+Uji pemetaan wizard (setiap kolom form ada di tepat satu langkah di `assets/js/langkah.js`, tidak ada `required` native) ada di bagian terakhir `tests/uji-harga.html` (baris WZ1 sampai WZ7). Halaman ini harus dibuka lewat `http://localhost:8000/tests/uji-harga.html` karena membaca `index.html`.
+
 Nilai awal harga (Template): lampiran gratis 20 halaman, Rp3.000 per 10 halaman, faktor tenggat 0 hari ×1,5, 1-2 hari ×1,25, 3-4 hari ×1,1, 5 hari atau lebih ×1,0, format di luar standar Rp5.000, sitasi Rp15.000, penjelasan Rp10.000, pengali atas ×1,2, tugas lainnya ×0,8 sampai ×1,6, pembulatan ke atas Rp1.000.
 
 Semua angka dihitung dengan program memakai rumus yang sama, lalu dicocokkan dengan hitungan manual.
@@ -54,6 +56,28 @@ Dicoba di HP asli (minimal satu Android atau iPhone) dan di komputer.
 | T8 | Kontras warna | Semua teks minimal 4,5:1 (cek dengan alat kontras) |
 | T9 | Pembaca layar atau cek cepat | Setiap kolom punya label, perubahan estimasi diumumkan |
 | T10 | Kecepatan di jaringan seluler biasa | Halaman terbuka dan bisa diisi dalam beberapa detik |
+| W1 | Wizard: buka halaman, lebar 360 px | Hanya langkah 1 tampil, penunjuk "Langkah 1 dari 4", tombol bar "Lanjut", tombol Kembali tidak ada |
+| W2 | Tekan Lanjut dengan kolom kosong (langkah 1, 2, 3, dan 4 lewat Kirim) | Tetap di langkah itu, pesan resmi di bawah kolom, fokus ke kolom salah pertama |
+| W3 | Isi benar lalu Lanjut | Pindah langkah, fokus di judul langkah, segmen penunjuk berpindah, pembaca layar mengumumkan "Langkah X dari 4: {{judul}}" |
+| W4 | Kembali dari langkah 2, 3, dan 4 | Isian tidak hilang, tidak ada pesan kesalahan baru yang muncul karena menekan Kembali |
+| W5 | Tekan Enter di kolom teks langkah 1 sampai 3 | Sama dengan Lanjut, tidak mengirim |
+| W6 | Di langkah 4: Enter di area teks, Enter di kotak persetujuan | Area teks membuat baris baru; kotak persetujuan tidak mengirim; kirim hanya lewat tombol |
+| W7 | Di langkah 4, kosongkan prodi lewat Kembali, lalu kirim | Form pindah ke langkah 1, fokus ke prodi, tidak ada POST |
+| W8 | Ukur tinggi bar di 360 x 640 pada: langkah 1, estimasi tampil, lampiran 101 halaman, tenggat hari ini | Setiap keadaan kurang dari 160 px (25% layar). Hasil terukur Tahap wizard: 120, 81 (kosong), 140, 154 px |
+| W9 | Tab dengan keyboard di setiap langkah | Fokus tidak masuk ke kolom di langkah tersembunyi, tidak ada galat "invalid form control" di konsol |
+| W10 | Ringkasan langkah 4 setelah mengisi prodi `<b>x</b>` | Tampil sebagai teks apa adanya, bukan tebal |
+| G1 | Buka halaman dengan pengaturan sistem gerak normal | Judul, paragraf, dan tombol pembuka muncul bertahap (±0,4 detik), lalu diam |
+| G2 | Aktifkan "kurangi gerak" di sistem (Windows: Efek animasi mati; Android: Hapus animasi; iPhone: Kurangi Gerakan), muat ulang, lalu isi form sampai kirim | Tidak ada gerak sama sekali, semua konten dan tombol tetap berfungsi |
+| G3 | Lanjut dan Kembali antar langkah di 360 px | Isi langkah bergeser dari kanan (maju) dan dari kiri (kembali), tidak ada gulir mendatar, fokus langsung di judul, keyboard bisa mengetik tanpa menunggu |
+| G4 | Pilih Mahasiswa atau Pelajar, pilih "Lainnya" di mata pelajaran, pilih "Tugas lainnya", isi jumlah file dari 0 ke angka lain | Kolom yang muncul memudar halus, kolom di bawahnya tidak melompat berlebihan saat mengetik |
+| G5 | Tekan tombol Lanjut dengan jari dan mouse | Warna berubah halus, tombol mengecil sedikit saat ditekan; tombol non-aktif (abu-abu krem) tidak mengecil |
+| G6 | Fokus kolom dengan Tab | Garis tepi berubah halus ke warna utama, garis fokus 3 px langsung terlihat |
+| G7 | Picu pesan kesalahan (Lanjut dengan kolom kosong) | Pesan memudar masuk, tanpa getar |
+| G8 | Ubah total halaman atau tenggat sampai angka kisaran berubah | Sorotan krem kekuningan memudar sebentar di belakang angka. Teks berganti seketika. Pembaca layar tidak mengumumkan dua kali |
+| G9 | Gulir ke form di HP (pertama kali) | Bar bawah naik halus sekali; gulir berikutnya tidak mengulang |
+| G10 | Kirim pesanan (Sheets hidup) dan kembali dari WhatsApp | Panel muncul lembut dan centang tergambar; bila Sheets gagal, panel tanpa centang |
+| G11 | Gerak di HP kelas bawah atau lama | Tidak patah-patah (hanya transform dan opacity yang dipakai). Catat bila terasa berat |
+| W11 | Pembaca layar sungguhan (TalkBack atau VoiceOver) saat pindah langkah | Pengumuman terdengar sekali dan jelas, tidak ganda atau memotong |
 
 ## 3. Uji pesanan dan Sheets
 

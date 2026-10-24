@@ -14,11 +14,20 @@ Semua teks di sini adalah **teks resmi** untuk tampilan. Claude Code memakainya 
 | 6 | Pertanyaan umum | 5-6 tanya-jawab |
 | 7 | Footer | Catatan "dibantu AI", privasi singkat, kontak WhatsApp |
 
-Di HP, kartu estimasi dan tombol kirim **menempel di bawah layar** selama form terlihat.
+Di HP, satu bar tunggal (kisaran estimasi ringkas, peringatan ringkas, dan tombol Lanjut atau Kirim ke WhatsApp) **menempel di bawah layar** selama form terlihat. Tinggi bar di 360 x 640 harus kurang dari 25% layar (160 px).
 
 ## 2. Form pesanan
 
-Urutan isian dari atas ke bawah. "Wajib" berarti tombol kirim tidak aktif sebelum terisi.
+Form berupa **wizard 4 langkah** dalam satu `<form>`. Semua kolom ada di halaman, hanya satu langkah yang tampil (yang lain `hidden`). Pemetaan kolom ke langkah disimpan di `assets/js/langkah.js` dan diuji di `tests/uji-harga.html` (setiap kolom tepat satu langkah). Kolom jebakan (H) berada di luar semua langkah.
+
+| Langkah | Kolom |
+|---|---|
+| 1. Tentang kamu | Jenjang, prodi, semester, mata kuliah, kelas, mata pelajaran (+ ketik sendiri) |
+| 2. Tugasmu | Jenis tugas (+ nama tugas lainnya), target output, format output, opsi tambahan |
+| 3. Lampiran dan tenggat | Jumlah file, total halaman, tenggat |
+| 4. Tinjau dan kirim | Ringkasan langkah 1 sampai 3, kebutuhan detail, ketentuan tugas, persetujuan |
+
+Sub-bagian A sampai G di bawah menjelaskan aturan tiap kolom. Urutan tampil mengikuti tabel di atas, bukan urutan huruf A sampai G. Kolom wajib diberi tanda * di labelnya (dan `aria-required`).
 
 ### A. Jenjang
 
@@ -91,16 +100,29 @@ Satu kolom teks bernama `website`, **disembunyikan** dari manusia (CSS, `tabinde
 4. Jumlah file lampiran = 0 menyembunyikan kolom Total halaman.
 5. Tenggat hari ini memunculkan kotak peringatan (Bagian 4).
 6. Semua pesan kesalahan muncul **di bawah kolomnya**, dan fokus pindah ke kolom salah pertama saat tombol ditekan.
-7. Tombol kirim non-aktif sampai semua isian wajib benar dan persetujuan dicentang.
+7. Di langkah 4, tombol kirim tampak non-aktif sampai semua isian wajib benar dan persetujuan dicentang (tetap bisa ditekan agar fokus pindah ke kolom salah pertama). Tombol Lanjut di langkah 1 sampai 3 selalu tampak aktif.
+
+### Perilaku wizard
+
+1. **Lanjut** memeriksa kolom langkah itu saja, dengan validasi dan pesan Bagian 9 yang sama. Jika ada yang salah, pesan muncul di bawah kolom dan fokus pindah ke kolom salah pertama. Jika benar, pindah ke langkah berikutnya.
+2. **Kembali** (tombol bergaya tautan, tidak ada di langkah 1) tidak memeriksa dan tidak menghapus isian.
+3. **Kirim** memeriksa ulang semua langkah. Jika ada yang salah di langkah sebelumnya, form pindah ke langkah itu dan fokus ke kolom salah pertama.
+4. Saat pindah langkah, fokus pindah ke judul langkah, penunjuk memakai `aria-current="step"`, dan area `aria-live` mengumumkan "Langkah X dari 4: {{judul}}". Penunjuk tidak bisa diklik.
+5. Enter di langkah 1 sampai 3 sama dengan Lanjut. Di langkah 4, Enter di area teks membuat baris baru dan kirim hanya lewat tombol.
+6. Langkah yang tidak aktif disembunyikan (`hidden`) sehingga tidak bisa difokus. Form memakai `novalidate` dan tanpa atribut `required` native.
+7. Tidak ada penyimpanan per langkah. Data dikirim ke Sheets sekali, di akhir.
+8. Ringkasan di langkah 4 memuat isian langkah 1 sampai 3 (jenjang, prodi atau kelas, semester, mata kuliah atau mata pelajaran, jenis tugas, target output, format, tambahan, jumlah file, total halaman, tenggat), ditampilkan sebagai teks (`textContent`).
+9. Mengganti jenjang di langkah 1 tetap mengosongkan isian turunannya (Bagian 2A), termasuk jenis tugas dan target output di langkah 2.
 
 ## 4. Kartu estimasi (keadaan dan teks)
 
 | Keadaan | Tampilan |
 |---|---|
-| Belum memilih tugas | "Pilih jenis tugas untuk melihat estimasi." |
-| Normal | Judul "Estimasi biaya". Angka: **Rp{{bawah}} - Rp{{atas}}**. Di bawahnya teks peringatan wajib (Bagian 6) |
-| Tugas lainnya | Sama seperti normal, ditambah: "Karena tugasnya di luar daftar, kisarannya lebih lebar. Harga pasti kami kabari setelah membaca kebutuhanmu." |
-| Tenggat hari ini | Normal, ditambah kotak peringatan: "Tenggat hari ini perlu kami konfirmasi dulu, belum tentu bisa. Kami kabari lewat WhatsApp." |
+| Belum memilih tugas | Di langkah 1 dan 2: "Estimasi muncul setelah kamu mengisi sampai langkah 3." Di langkah 3 dan 4: "Pilih jenis tugas untuk melihat estimasi." |
+| Tugas sudah dipilih tapi tenggat atau lampiran belum terisi | Di langkah 1 dan 2: "Estimasi muncul setelah kamu mengisi sampai langkah 3." Di langkah 3 dan 4: bar tanpa angka dan tanpa peringatan |
+| Normal | Angka: **Rp{{bawah}} - Rp{{atas}}** di bar (judul "Estimasi biaya" hanya untuk pembaca layar). Di bawahnya peringatan ringkas (HP) atau penuh (layar lebar). Peringatan penuh juga ada di langkah 4. Peringatan hanya tampil bila ada angka |
+| Tugas lainnya | Sama seperti normal. Di langkah 4 (bukan di bar), ditambah: "Karena tugasnya di luar daftar, kisarannya lebih lebar. Harga pasti kami kabari setelah membaca kebutuhanmu." |
+| Tenggat hari ini | Normal. Kotak peringatan tampil di bawah kolom tenggat (langkah 3) dan di langkah 4, bukan di bar: "Tenggat hari ini perlu kami konfirmasi dulu, belum tentu bisa. Kami kabari lewat WhatsApp." |
 | Lampiran melebihi batas | Angka diganti: "Lampiranmu lebih dari {{batasLampiran}} halaman. Harganya kami hitung manual, hubungi kami lewat WhatsApp." Tombol berubah jadi "Hubungi kami lewat WhatsApp" (pesan tetap berisi isian, tanpa estimasi) |
 | Data belum lengkap/salah | Angka tetap tampil jika masih bisa dihitung. Tombol kirim non-aktif |
 
@@ -110,7 +132,8 @@ Rincian (harga dasar, tambahan, lampiran, tenggat, opsi) **boleh** dibuat sebaga
 
 | Keadaan | Teks tombol |
 |---|---|
-| Siap | **Kirim ke WhatsApp** |
+| Langkah 1 sampai 3 | **Lanjut** (bar tunggal). **Kembali** di dalam kartu, mulai langkah 2 |
+| Siap (langkah 4) | **Kirim ke WhatsApp** |
 | Mengirim | **Mencatat pesananmu...** (tombol non-aktif, mencegah klik ganda) |
 | Berhasil | Panel "Pesananmu tercatat" (lihat di bawah), lalu WhatsApp dibuka |
 | Sheets gagal atau lebih dari 8 detik | Tetap buka WhatsApp, panel: "Pesananmu belum tercatat otomatis, tapi tetap bisa kamu kirim lewat WhatsApp. Kode sementara: {{kode}}" |
@@ -129,35 +152,48 @@ Tautan: `https://wa.me/6289619114292?text=` + isi pesan yang di-*encode* (`encod
 ```
 Halo Jade, aku mau pesan layanan pendampingan.
 
-Kode pesanan: {{kode}}
+*KODE PESANAN: {{kode}}*
+
+*Identitas*
 Jenjang: {{jenjang}}
 {{Prodi: ... / Kelas: ...}}
 {{Semester: ... (hanya mahasiswa)}}
 {{Mata kuliah / Mata pelajaran}}: {{...}}
+
+*Tugas*
 Jenis tugas: {{jenis_tugas}}
 Target output: {{target}} {{satuan}}
-Lampiran: {{jumlah_file}} file, total {{total_halaman}} hlm (akan kukirim di chat ini)
 Format output: {{format}}
 Tenggat: {{tanggal, contoh 28 Okt 2026}} ({{n}} hari lagi)
 Tambahan: {{daftar opsi, atau "tidak ada"}}
+Lampiran: {{jumlah_file}} file, total {{total_halaman}} hlm (akan kukirim di chat ini)
 
-Kebutuhan detail:
-{{teks, dipotong 400 karakter}}
+*Kebutuhan detail*
+> {{teks klien, dipotong 400 karakter, tiap baris diawali "> "}}
 
-Ketentuan tugas:
-{{teks, dipotong 400 karakter}}
+*Ketentuan tugas*
+> {{teks klien, dipotong 400 karakter, tiap baris diawali "> "}}
 
-Estimasi: Rp{{bawah}} - Rp{{atas}}
-(Estimasi awal, harga final menunggu konfirmasi dari kalian.)
+*ESTIMASI: Rp{{bawah}} - Rp{{atas}}*
+_Estimasi awal, harga final menunggu konfirmasi dari kalian._
 ```
 
+Gaya: satu baris kosong antar bagian. Tebal (*...*) hanya untuk judul bagian, baris kode pesanan, dan baris estimasi. Miring (_..._) hanya untuk keterangan estimasi dan catatan. Untuk Pelajar, baris "Kelas" menggantikan "Prodi" dan tidak ada baris "Semester".
+
 Aturan:
-1. Jika teks dipotong, tambahkan " ... (selengkapnya di pesanan {{kode}})". Teks lengkap sudah tersimpan di Sheets.
-2. Jika lampiran melebihi batas, baris Estimasi diganti: "Estimasi: tidak dihitung (lampiran lebih dari {{batasLampiran}} hlm), mohon dihitung manual."
-3. Jika Sheets gagal, tambahkan baris: "Catatan: pesanan belum tercatat otomatis."
+1. Jika teks dipotong, tambahkan " ... (selengkapnya di pesanan {{kode}})". Teks lengkap sudah tersimpan di Sheets. Pemotongan dihitung per karakter utuh (grafem, lewat `Intl.Segmenter`; cadangan `Array.from`), bukan per unit, agar emoji tidak rusak. Hitungan memakai teks asli, sebelum karakter lebar-nol disisipkan.
+2. Jika lampiran melebihi batas, baris estimasi diganti: "*ESTIMASI: tidak dihitung (lampiran lebih dari {{batasLampiran}} hlm), mohon dihitung manual.*"
+3. Jika Sheets gagal, tambahkan setelah satu baris kosong: "_Catatan: pesanan belum tercatat otomatis._"
 4. Tanggal ditulis format Indonesia (contoh "28 Okt 2026"). Angka uang memakai pemisah titik (contoh Rp88.000).
 5. Tidak ada nomor HP, alamat, atau data pribadi lain di pesan.
-6. Jika harga tidak bisa dihitung karena data harga bermasalah (bukan karena lampiran), baris Estimasi diganti: "Estimasi: tidak dihitung (data harga belum terbaca), mohon dihitung manual."
+6. Jika harga tidak bisa dihitung karena data harga bermasalah (bukan karena lampiran), baris estimasi diganti: "*ESTIMASI: tidak dihitung (data harga belum terbaca), mohon dihitung manual.*"
+7. **Netralisasi teks klien.** Teks klien tampil apa adanya tetapi tidak boleh memicu format WhatsApp (tebal, miring, coret, monospasi, daftar, kutipan). Caranya, dengan karakter lebar-nol (U+200B, tidak terlihat):
+   - Setiap karakter `*`, `_`, `~`, `` ` `` diapit karakter lebar-nol di kiri dan kanan. Berlaku juga untuk isian satu baris dari klien (prodi, mata kuliah, mata pelajaran, jenis tugas lainnya).
+   - Baris teks klien yang diawali "- ", "* ", "angka. ", atau ">" diberi karakter lebar-nol di depannya (setelah awalan "> ").
+   - Teks banyak baris tetap satu kutipan: tiap baris diawali "> ". Baris kosong ditulis "> " + karakter lebar-nol.
+   - Akhir baris `\r\n` diseragamkan menjadi `\n`.
+   - Risiko yang diterima: perilaku karakter lebar-nol belum diuji di semua versi WhatsApp (Android, iPhone, Web), dan karakter itu ikut tersalin bila admin menyalin teks klien. Bila masih ada yang terformat, ganti ke karakter lebar penuh (contoh ＊).
+8. Tombol "Salin pesan" menyalin teks yang sama persis dengan yang dikirim ke WhatsApp (variabel `pesanTerakhir`).
 
 ## 7. Daftar pilihan Pelajar
 
@@ -172,6 +208,15 @@ Daftar ini disimpan di `assets/js/config.js` (bukan di Sheets).
 |---|---|
 | Judul halaman (`<title>`) | Jade: Estimasi Biaya Pendampingan Tugas |
 | Deskripsi (meta) | Hitung estimasi biaya pendampingan tugas untuk pelajar SMA dan mahasiswa. Isi form, lihat estimasinya, kirim lewat WhatsApp. |
+| Penunjuk langkah | Langkah X dari 4 |
+| Wizard langkah 1 | **Tentang kamu**: Pilih jenjang dan isi data singkat agar kami bisa menyesuaikan layanan. |
+| Wizard langkah 2 | **Tugasmu**: Pilih jenis tugas dan hasil yang kamu butuhkan. |
+| Wizard langkah 3 | **Lampiran dan tenggat**: Beri tahu bahan yang akan kamu kirim dan kapan hasilnya dibutuhkan. |
+| Wizard langkah 4 | **Tinjau dan kirim**: Periksa ringkasan dan estimasi, lalu kirim lewat WhatsApp. |
+| Tombol wizard | Kembali, Lanjut, dan di akhir Kirim ke WhatsApp |
+| Keterangan kolom wajib | * wajib diisi |
+| Estimasi di langkah 1 dan 2 | Estimasi muncul setelah kamu mengisi sampai langkah 3. |
+| Judul ringkasan (langkah 4) | Ringkasan pesananmu (nilai opsi tambahan kosong: Tidak ada) |
 | Judul pembuka | Estimasi biaya pendampingan tugasmu, dalam 3 menit |
 | Subjudul | Pilih jenis tugas, isi kebutuhanmu, lihat estimasinya, lalu kirim ke kami lewat WhatsApp. Kami bantu menyusun draf bahan belajar, kamu yang memeriksa dan memahaminya. |
 | Tombol pembuka | Mulai pesan |

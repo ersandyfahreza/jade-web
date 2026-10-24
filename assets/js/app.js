@@ -14,7 +14,13 @@
   form.addEventListener("focusin", (e) => {
     if (innerWidth <= 640 && !bar.contains(e.target)) e.target.scrollIntoView({ block: "nearest" });
   });
+  form.addEventListener("animationend", (e) => e.target.classList.remove("baru"));
   new ResizeObserver(() => document.documentElement.style.setProperty("--tinggi-bar", bar.offsetHeight + "px")).observe(bar);
+  // Gerak saja: bar naik halus saat pertama terlihat sepenuhnya. Tanpa kelas ini bar tampil normal
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((e) => { if (e[0].isIntersecting) { bar.classList.add("bar-masuk"); io.disconnect(); } }, { threshold: 1 });
+    io.observe(bar);
+  }
 
   // Pesan kesalahan resmi (SPEC layar Bagian 9)
   const PESAN = {
@@ -38,6 +44,8 @@
   const tugasLainnya = () => $("jenis").value === "Tugas lainnya";
   // Tanggal hari ini zona Asia/Jakarta, format YYYY-MM-DD
   const hariIni = () => tanggalJakarta(new Date());
+
+  let kini = 0; // indeks langkah wizard yang tampil (daftar kolom per langkah ada di langkah.js)
 
   // ada: kapan isian tampil dan ikut diperiksa
   const FIELDS = [
@@ -96,6 +104,7 @@
     else w.append(g);
     const el = elemen(f);
     el.setAttribute("aria-describedby", ((el.getAttribute("aria-describedby") || "") + " " + g.id).trim());
+    if (f.tipe !== "radio") el.setAttribute("aria-required", "true");
   });
 
   function tampilkanError(f) {
@@ -127,16 +136,26 @@
     const { sisa, hasil } = hitungSekarang();
     // Susun teks dulu; isi kartu hanya diganti jika berbeda, agar pembaca layar tidak membacakan ulang
     const isi = [];
-    if (!hasil) isi.push(["pesan", "Pilih jenis tugas untuk melihat estimasi."]);
+    const belumSampai3 = "Estimasi muncul setelah kamu mengisi sampai langkah 3.";
+    if (!hasil) isi.push(["pesan", kini <= 1 ? belumSampai3 : "Pilih jenis tugas untuk melihat estimasi."]);
     else if (hasil.status === "hubungi") {
       isi.push(["pesan", `Lampiranmu lebih dari ${config.harga.batasLampiran} halaman. Harganya kami hitung manual, hubungi kami lewat WhatsApp.`]);
     } else if (hasil.status === "tidakBisa" && hasil.alasan === "aturanTenggat") {
       isi.push(["pesan", PESAN.hargaGagal]);
     } else if (hasil.status === "ok") {
       isi.push(["angka", `${rupiahWA(hasil.bawah)} - ${rupiahWA(hasil.atas)}`]);
-      if (hasil.lainnya) isi.push(["pesan", "Karena tugasnya di luar daftar, kisarannya lebih lebar. Harga pasti kami kabari setelah membaca kebutuhanmu."]);
-      if (hasil.hariIni) isi.push(["kotak-peringatan", "Tenggat hari ini perlu kami konfirmasi dulu, belum tentu bisa. Kami kabari lewat WhatsApp."]);
     }
+    // Di langkah 1-2 tenggat dan lampiran belum terisi, jadi angka belum bisa dihitung
+    if (!isi.length && kini <= 1) isi.push(["pesan", belumSampai3]);
+    // Catatan panjang tidak masuk bar yang menempel (tinggi dibatasi); tampil di langkah 4 dan, untuk tenggat hari ini, di langkah 3
+    const ok = hasil && hasil.status === "ok";
+    const catat = (id, teks) => { $(id).textContent = teks; $(id).hidden = !teks; };
+    catat("catatan-lainnya", ok && hasil.lainnya ? "Karena tugasnya di luar daftar, kisarannya lebih lebar. Harga pasti kami kabari setelah membaca kebutuhanmu." : "");
+    const teksHariIni = ok && hasil.hariIni ? "Tenggat hari ini perlu kami konfirmasi dulu, belum tentu bisa. Kami kabari lewat WhatsApp." : "";
+    catat("catatan-hari-ini", teksHariIni);
+    catat("catatan-hari-ini-3", teksHariIni);
+    // Peringatan hanya berarti di dekat angka kisaran
+    form.querySelectorAll(".estimasi .peringatan").forEach((p) => (p.hidden = !ok));
     const kunci = JSON.stringify(isi);
     if (kunci !== isiTerakhir) {
       isiTerakhir = kunci;
@@ -147,7 +166,8 @@
         return p;
       }));
     }
-    tombolKirim.textContent = hasil && hasil.status === "hubungi" ? "Hubungi kami lewat WhatsApp" : "Kirim ke WhatsApp";
+    tombolKirim.textContent = kini < LANGKAH.length - 1 ? "Lanjut"
+      : hasil && hasil.status === "hubungi" ? "Hubungi kami lewat WhatsApp" : "Kirim ke WhatsApp";
 
     $("tenggat-bantuan").textContent = labelTenggat(config, sisa);
   }
@@ -158,6 +178,7 @@
       const w = pembungkus(f);
       const tadiSembunyi = w.hidden;
       w.hidden = !adaField(f);
+      w.classList.toggle("baru", !w.hidden && (tadiSembunyi || w.classList.contains("baru"))); // hanya untuk gerak muncul; dilepas saat animasi selesai
       // Tanpa lampiran, total halaman dianggap 0; saat muncul lagi dikosongkan
       if (f.id === "total-hlm") {
         if (w.hidden) $(f.id).value = "0";
@@ -169,7 +190,8 @@
       const ta = h.parentNode.querySelector("textarea");
       h.textContent = `${ta.value.length}/${ta.maxLength}`;
     });
-    tombolKirim.setAttribute("aria-disabled", FIELDS.every((f) => !adaField(f) || !periksa(f)) ? "false" : "true");
+    // Lanjut (langkah 1-3) selalu tampak aktif: tombol itulah yang memunculkan pesan kesalahan
+    tombolKirim.setAttribute("aria-disabled", kini < LANGKAH.length - 1 || FIELDS.every((f) => !adaField(f) || !periksa(f)) ? "false" : "true");
     // Ketikan ditunda 150 ms agar tidak berat dan pembaca layar tidak kebanjiran
     clearTimeout(timerEstimasi);
     if (tunda === true) timerEstimasi = setTimeout(tampilkanEstimasi, 150);
@@ -221,13 +243,92 @@
     perbarui();
   });
 
-  // Tombol terlihat non-aktif, tetapi tetap bisa ditekan agar fokus pindah ke kolom salah pertama
+  // Wizard: tiap langkah hanya tampil sendiri; kolom yang salah pertama (urutan tampil) mendapat fokus
+  const penunjuk = $("penunjuk");
+  LANGKAH.forEach((l) => {
+    const li = document.createElement("li");
+    const s = document.createElement("span");
+    s.className = "sr-only";
+    s.textContent = l.judul;
+    li.append(s);
+    penunjuk.append(li);
+  });
+  const salahPertama = (i) => FIELDS.find((f) => LANGKAH[i].kolom.includes(f.id) && adaField(f) && periksa(f));
+
+  function isiRingkasan() {
+    const lab = (id) => form.querySelector(`label[for="${id}"]`).textContent;
+    const mhs = jenjang() === "Mahasiswa";
+    const baris = [
+      ["Jenjang", jenjang()],
+      ...(mhs ? [[lab("prodi"), $("prodi").value.trim()], [lab("semester"), $("semester").value], [lab("matkul"), $("matkul").value.trim()]]
+        : [[lab("kelas"), $("kelas").value], [lab("mapel"), $("mapel").value === "Lainnya" ? $("mapel-lain").value.trim() : $("mapel").value]]),
+      [lab("jenis"), tugasLainnya() ? `Tugas lainnya (${$("jenis-lain").value.trim()})` : $("jenis").value],
+      [lab("target"), $("target").value],
+      [lab("format"), $("format").value],
+      ["Tambahan", [$("sitasi").checked && "Sitasi diperiksa", $("penjelasan").checked && "Penjelasan hasil"].filter(Boolean).join(", ") || "Tidak ada"],
+      [lab("jml-file"), $("jml-file").value],
+      ...(jmlFileNol() ? [] : [[lab("total-hlm"), $("total-hlm").value]]),
+      [lab("tenggat"), tanggalIndonesia($("tenggat").value)]
+    ];
+    $("ringkasan").replaceChildren(...baris.map(([k, v]) => {
+      const d = document.createElement("div");
+      const dt = document.createElement("dt");
+      const dd = document.createElement("dd");
+      dt.textContent = k;
+      dd.textContent = v;
+      d.append(dt, dd);
+      return d;
+    }));
+  }
+
+  function tampilLangkah(i, awal = false) {
+    if (!awal) form.dataset.arah = i < kini ? "mundur" : "maju"; // hanya untuk arah gerak
+    kini = i;
+    form.querySelectorAll("[data-langkah]").forEach((s) => (s.hidden = Number(s.dataset.langkah) !== i));
+    [...penunjuk.children].forEach((li, n) => {
+      li.className = n < i ? "selesai" : "";
+      if (n === i) li.setAttribute("aria-current", "step");
+      else li.removeAttribute("aria-current");
+    });
+    const l = LANGKAH[i];
+    $("langkah-ke").textContent = `Langkah ${i + 1} dari ${LANGKAH.length}`;
+    $("judul-langkah").textContent = l.judul;
+    $("penjelas-langkah").textContent = l.penjelas;
+    $("kembali").hidden = i === 0;
+    if (i === LANGKAH.length - 1) isiRingkasan();
+    perbarui();
+    if (awal) return;
+    $("umum-langkah").textContent = `Langkah ${i + 1} dari ${LANGKAH.length}: ${l.judul}`;
+    form.scrollIntoView({ block: "start" });
+    $("judul-langkah").focus({ preventScroll: true });
+  }
+
+  function lanjut() {
+    LANGKAH[kini].kolom.forEach((id) => dipakai.add(id));
+    perbarui();
+    const salah = salahPertama(kini);
+    if (salah) return elemen(salah).focus();
+    tampilLangkah(kini + 1);
+  }
+
+  $("kembali").addEventListener("click", () => tampilLangkah(kini - 1));
+
+  // Di langkah terakhir, Enter di luar textarea dan tombol tidak boleh mengirim
+  form.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && kini === LANGKAH.length - 1 && !["TEXTAREA", "BUTTON", "A"].includes(e.target.tagName)) e.preventDefault();
+  });
+
+  // Tombol terlihat non-aktif di langkah terakhir, tetapi tetap bisa ditekan agar fokus pindah ke kolom salah pertama
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (kini < LANGKAH.length - 1) return lanjut();
     FIELDS.forEach((f) => dipakai.add(f.id));
     perbarui();
-    const salah = FIELDS.find((f) => adaField(f) && periksa(f));
-    if (salah) return elemen(salah).focus();
+    const i = LANGKAH.findIndex((_, n) => salahPertama(n));
+    if (i >= 0) {
+      if (i !== kini) tampilLangkah(i);
+      return elemen(salahPertama(i)).focus();
+    }
     kirim();
   });
 
@@ -325,6 +426,7 @@
       $("wa-lagi").href = tautan;
       $("salin-status").textContent = "";
       $("salin-manual").hidden = true;
+      $("panel-kirim").classList.toggle("belum-tercatat", !kodeServer); // centang hanya bila tercatat
       $("panel-kirim").hidden = false;
     } finally {
       window.location.href = tautan;
@@ -360,6 +462,6 @@
     $("data-gagal").hidden = false;
   }
   isiJenis();
-  perbarui();
+  tampilLangkah(0, true);
   form.inert = false;
 })();

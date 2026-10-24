@@ -40,10 +40,16 @@
   <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
   <tbody id="baris5"></tbody>
 </table>
+<h2>Pemetaan kolom ke langkah wizard (langkah.js dan index.html)</h2>
+<table>
+  <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
+  <tbody id="baris6"></tbody>
+</table>
 <script src="../data/fallback.js"></script>
 <script src="../assets/js/muat-config.js"></script>
 <script src="../assets/js/pricing.js"></script>
 <script src="../assets/js/pesan.js"></script>
+<script src="../assets/js/langkah.js"></script>
 <script>
   // Angka diharapkan disalin dari docs/RENCANA_UJI.md Bagian 1. Jangan diubah; perbaiki pricing.js.
   // [no, jenjang, tugas, target, lampiran, sisaHari, format, sitasi, penjelasan, bawah, atas]
@@ -117,12 +123,19 @@
   const pesanPlj = susunPesanWA(pelajar);
   const lengkap = [
     "Halo Jade, aku mau pesan layanan pendampingan.", "",
-    "Kode pesanan: JD-OFF-AB12", "Jenjang: Mahasiswa", "Prodi: Ekonomi", "Semester: 3", "Mata kuliah: Pengantar Ilmu Ekonomi",
-    "Jenis tugas: Draf makalah", "Target output: 8 hlm", "Lampiran: 2 file, total 30 hlm (akan kukirim di chat ini)",
-    "Format output: PDF", "Tenggat: 28 Okt 2026 (4 hari lagi)", "Tambahan: Sitasi diperiksa manual", "",
-    "Kebutuhan detail:", "Butuh draf tentang inflasi", "", "Ketentuan tugas:", "-", "",
-    "Estimasi: Rp88.000 - Rp106.000", "(Estimasi awal, harga final menunggu konfirmasi dari kalian.)"
+    "*KODE PESANAN: JD-OFF-AB12*", "",
+    "*Identitas*", "Jenjang: Mahasiswa", "Prodi: Ekonomi", "Semester: 3", "Mata kuliah: Pengantar Ilmu Ekonomi", "",
+    "*Tugas*", "Jenis tugas: Draf makalah", "Target output: 8 hlm", "Format output: PDF",
+    "Tenggat: 28 Okt 2026 (4 hari lagi)", "Tambahan: Sitasi diperiksa",
+    "Lampiran: 2 file, total 30 hlm (akan kukirim di chat ini)", "",
+    "*Kebutuhan detail*", "> Butuh draf tentang inflasi", "", "*Ketentuan tugas*", "> -", "",
+    "*ESTIMASI: Rp88.000 - Rp106.000*", "_Estimasi awal, harga final menunggu konfirmasi dari kalian._"
   ].join("\n");
+  const ZW = "​";
+  const aneh = susunPesanWA(Object.assign({}, mhs, { kebutuhan: "*tebal* _miring_ ~coret~ `kode`\n> kutip\n- daftar\n* bintang\n1. nomor\n\nSalam \u{1F600}", prodi: "A*B*", ketentuan: "x" }));
+  const bagianKebutuhan = aneh.split("*Kebutuhan detail*\n")[1].split("\n\n*Ketentuan")[0].split("\n");
+  const tanpaLN = (t) => t.split(ZW).join("");
+  const sheetsGagal = susunPesanWA(Object.assign({}, mhs, { belumTercatat: true }));
   const panjang400 = susunPesanWA(Object.assign({}, mhs, { kebutuhan: "a".repeat(400) }));
   const panjang401 = susunPesanWA(Object.assign({}, mhs, { kebutuhan: "a".repeat(401) }));
   const lampiranLebih = susunPesanWA(Object.assign({}, mhs, { atas: null }));
@@ -130,22 +143,38 @@
   const baris3 = [
     ["W1", "Mahasiswa: semua baris persis format", lengkap, pesanMhs],
     ["W2", "Pelajar: Kelas dan mapel, tanpa Semester/Prodi, Tambahan penjelasan", "benar",
-      pesanPlj.includes("\nKelas: 11\nMata pelajaran: Fisika\nJenis") && !/Semester|Prodi/.test(pesanPlj) && pesanPlj.includes("Tambahan: Penjelasan hasil") ? "benar" : "salah"],
+      pesanPlj.includes("\nKelas: 11\nMata pelajaran: Fisika\n\n*Tugas*\nJenis") && !/Semester|Prodi/.test(pesanPlj) && pesanPlj.includes("Tambahan: Penjelasan hasil") ? "benar" : "salah"],
     ["W3", "Tambahan kosong", "Tambahan: tidak ada", susunPesanWA(Object.assign({}, mhs, { sitasi: false })).match(/Tambahan: .*/)[0]],
     ["W4", "Teks tepat 400 karakter tidak dipotong", "tanpa keterangan", String(!panjang400.includes("selengkapnya") ? "tanpa keterangan" : "dipotong")],
     ["W5", "Teks 401 karakter dipotong jadi 400 + keterangan",
-      "a".repeat(400) + " ... (selengkapnya di pesanan JD-OFF-AB12)", panjang401.split("\n")[15]],
+      "a".repeat(400) + " ... (selengkapnya di pesanan JD-OFF-AB12)", panjang401.split("\n")[19].slice(2)],
     ["W6", "Lampiran melebihi batas: baris Estimasi diganti",
-      "Estimasi: tidak dihitung (lampiran lebih dari 100 hlm), mohon dihitung manual.", lampiranLebih.match(/Estimasi: .*/)[0]],
-    ["W7", "Belum tercatat: baris Catatan di akhir", "Catatan: pesanan belum tercatat otomatis.", offline.split("\n").pop()],
+      "ESTIMASI: tidak dihitung (lampiran lebih dari 100 hlm), mohon dihitung manual.*", lampiranLebih.match(/ESTIMASI: .*/)[0]],
+    ["W7", "Belum tercatat: baris Catatan di akhir", "_Catatan: pesanan belum tercatat otomatis._", offline.split("\n").pop()],
     ["W8", "Sudah tercatat: tanpa baris Catatan", "tanpa Catatan", pesanMhs.includes("Catatan") ? "ada Catatan" : "tanpa Catatan"],
     ["W9", "Format tanggal Indonesia", "5 Mei 2026", tanggalIndonesia("2026-05-05")],
     ["W10", "Kode sementara berformat JD-OFF-XXXX", "cocok", /^JD-OFF-[A-Z0-9]{4}$/.test(buatKodeSementara()) ? "cocok" : "tidak cocok"],
     ["W11", "Tautan wa.me: nomor benar, baris baru jadi %0A", "cocok",
       tautanWA("6289619114292", "Halo\nJade") === "https://wa.me/6289619114292?text=Halo%0AJade" ? "cocok" : tautanWA("6289619114292", "Halo\nJade")],
     ["W12", "Harga belum terbaca: baris Estimasi khusus, bukan kalimat lampiran",
-      "Estimasi: tidak dihitung (data harga belum terbaca), mohon dihitung manual.",
-      susunPesanWA(Object.assign({}, mhs, { atas: null, hargaBelumTerbaca: true })).match(/Estimasi: .*/)[0]],
+      "ESTIMASI: tidak dihitung (data harga belum terbaca), mohon dihitung manual.*",
+      susunPesanWA(Object.assign({}, mhs, { atas: null, hargaBelumTerbaca: true })).match(/ESTIMASI: .*/)[0]],
+    ["W13", "Netralisasi: * _ ~ ` diapit lebar-nol", "benar",
+      bagianKebutuhan[0] === "> " + [["*", "tebal", "*"], ["_", "miring", "_"], ["~", "coret", "~"], ["`", "kode", "`"]]
+        .map(([a, k, b]) => ZW + a + ZW + k + ZW + b + ZW).join(" ") ? "benar" : bagianKebutuhan[0]],
+    ["W14", "Netralisasi: awal baris >, -, *, angka. diberi lebar-nol", "benar",
+      bagianKebutuhan[1] === "> " + ZW + "> kutip" && bagianKebutuhan[2] === "> " + ZW + "- daftar" && tanpaLN(bagianKebutuhan[3]) === "> * bintang"
+        && bagianKebutuhan[3].startsWith("> " + ZW) && bagianKebutuhan[4] === "> " + ZW + "1. nomor" ? "benar" : bagianKebutuhan.slice(1, 5).join("|")],
+    ["W15", "Teks banyak baris: tiap baris diawali '> ' (satu kutipan), baris kosong jadi '> ' + lebar-nol", "benar",
+      bagianKebutuhan.length === 7 && bagianKebutuhan.every((b) => b.startsWith("> ")) && bagianKebutuhan[5] === "> " + ZW && bagianKebutuhan[6] === "> Salam \u{1F600}" ? "benar" : bagianKebutuhan.join("|")],
+    ["W16", "Netralisasi isian satu baris (prodi)", "Prodi: A" + ZW + "*" + ZW + "B" + ZW + "*" + ZW, aneh.match(/Prodi: .*/)[0]],
+    ["W17", "Tanpa lebar-nol, teks klien sama persis dengan aslinya", "> *tebal* _miring_ ~coret~ `kode`", tanpaLN(bagianKebutuhan[0])],
+    ["W18", "Pelajar tanpa semester: ada Kelas, tanpa Prodi/Semester", "benar",
+      !/Semester|Prodi/.test(pesanPlj) && /\nKelas: 11\n/.test(pesanPlj) ? "benar" : "salah"],
+    ["W19", "Sheets gagal: catatan miring di akhir setelah baris kosong; sisanya sama", "benar",
+      sheetsGagal.split("\n").slice(-2).join("|") === "|_Catatan: pesanan belum tercatat otomatis._" && sheetsGagal.startsWith(pesanMhs) ? "benar" : "salah"],
+    ["W20", "Judul bagian tebal; tanpa nomor HP/data pribadi", "benar",
+      ["*Identitas*", "*Tugas*", "*Kebutuhan detail*", "*Ketentuan tugas*"].every((t) => pesanMhs.includes("\n" + t + "\n")) && !/\d{9,}/.test(pesanMhs) ? "benar" : "salah"],
     ["P1", "potongTeks: tepat 400 karakter tidak dipotong", "a".repeat(400), potongTeks("a".repeat(400), "K1")],
     ["P2", "potongTeks: 401 karakter dipotong 400 + keterangan", "a".repeat(400) + " ... (selengkapnya di pesanan K1)", potongTeks("a".repeat(401), "K1")],
     ["P3", "potongTeks: emoji di batas 399-400 tetap sah", "sah",
@@ -155,7 +184,11 @@
       (() => { const r = potongTeks("\u{1F600}".repeat(500), "K1"); try { encodeURIComponent(r); } catch (e) { return "error"; }
         return Array.from(r.split(" ... (")[0]).length === 400 && r.includes("selengkapnya") ? "sah" : "salah"; })()],
     ["P5", "potongTeks: 400 emoji (800 unit) tidak dipotong", "tanpa keterangan",
-      potongTeks("\u{1F600}".repeat(400), "K1").includes("selengkapnya") ? "dipotong" : "tanpa keterangan"]
+      potongTeks("\u{1F600}".repeat(400), "K1").includes("selengkapnya") ? "dipotong" : "tanpa keterangan"],
+    ["P6", "Emoji di batas 400 dalam pesan: utuh dan encode aman; lebar-nol tidak makan jatah", "sah",
+      (() => { const p = susunPesanWA(Object.assign({}, mhs, { kebutuhan: "_".repeat(399) + "\u{1F600}b" }));
+        try { encodeURIComponent(p); } catch (e) { return "error"; }
+        return p.includes("\u{1F600} ... (selengkapnya di pesanan JD-OFF-AB12)") ? "sah" : "salah"; })()]
   ].map(([no, nama, harap, hasil]) => [no, nama, String(harap), String(hasil), String(harap) === String(hasil)]);
 
   // Bagian 4: validasiConfig (Tahap 5). Config rusak harus "gagal", config fallback harus "lolos".
@@ -219,13 +252,41 @@
     ].map(([no, nama, harap, hasil]) => [no, nama, harap, hasil, harap === hasil]);
   }
 
-  ujiMuat().catch((e) => [["M0", "Menjalankan uji muatConfig (buka lewat http://localhost:8000)", "jalan", "error: " + e.message, false]]).then((baris5) => {
+  // Bagian 6: setiap kolom form ada di tepat satu langkah. Membaca index.html yang asli, jadi harus dibuka lewat server.
+  async function ujiLangkah() {
+    const doc = new DOMParser().parseFromString(await (await fetch("../index.html")).text(), "text/html");
+    const kontrol = [...doc.querySelectorAll("form input, form select, form textarea")]
+      // Kolom jebakan dan kotak salin-manual (readonly, bukan isian klien) memang di luar langkah
+      .filter((el) => el.type !== "hidden" && el.name !== "website" && !el.readOnly);
+    const kolomForm = [...new Set(kontrol.map((el) => (el.type === "radio" ? el.name : el.id)))];
+    const semua = LANGKAH.flatMap((l) => l.kolom);
+    const jumlah = (id) => semua.filter((x) => x === id).length;
+    const tanpa = kolomForm.filter((id) => jumlah(id) === 0);
+    const ganda = kolomForm.filter((id) => jumlah(id) > 1);
+    const asing = semua.filter((id) => !kolomForm.includes(id));
+    const hasilKosong = (a) => (a.length ? a.join(",") : "tidak ada");
+    return [
+      ["WZ1", "Kolom form tanpa langkah", "tidak ada", hasilKosong(tanpa)],
+      ["WZ2", "Kolom di lebih dari satu langkah", "tidak ada", hasilKosong(ganda)],
+      ["WZ3", "Langkah menyebut kolom yang tidak ada di form", "tidak ada", hasilKosong(asing)],
+      ["WZ4", "Kolom jebakan website tidak ada di langkah mana pun", "tidak ada", semua.includes("website") ? "ada" : "tidak ada"],
+      ["WZ5", "Empat langkah, judul dan kalimat penjelas terisi", "4", String(LANGKAH.filter((l) => l.judul && l.penjelas && l.kolom.length).length)],
+      ["WZ6", "Tidak ada atribut required native (form novalidate)", "0", String(doc.querySelectorAll("form [required]").length)],
+      ["WZ7", "Setiap langkah punya pembungkus data-langkah di form", "4", String(doc.querySelectorAll("form [data-langkah]").length)]
+    ].map(([no, nama, harap, hasil]) => [no, nama, harap, hasil, harap === hasil]);
+  }
+
+  Promise.all([
+    ujiMuat().catch((e) => [["M0", "Menjalankan uji muatConfig (buka lewat http://localhost:8000)", "jalan", "error: " + e.message, false]]),
+    ujiLangkah().catch((e) => [["WZ0", "Menjalankan uji pemetaan langkah (buka lewat http://localhost:8000)", "jalan", "error: " + e.message, false]])
+  ]).then(([baris5, baris6]) => {
     isiTabel("baris", baris);
     isiTabel("baris2", baris2);
     isiTabel("baris3", baris3);
     isiTabel("baris4", baris4);
     isiTabel("baris5", baris5);
-    const semua = baris.concat(baris2, baris3, baris4, baris5);
+    isiTabel("baris6", baris6);
+    const semua = baris.concat(baris2, baris3, baris4, baris5, baris6);
     const gagal = semua.filter((b) => !b[4]).length;
     document.getElementById("ringkas").textContent = gagal ? `${gagal} dari ${semua.length} baris CEK.` : `Semua ${semua.length} baris OK.`;
   });

@@ -1,14 +1,19 @@
 :root {
-  --latar: #F2F0EF;
-  --garis: #BBBDBC;
-  --utama: #245F73;
-  --aksen: #733E24;
-  --permukaan: #FFFFFF;
-  --teks: #1E2B30;
-  --teks-redup: #4A5A60;
-  --garis-input: #8A8D8C;
-  --utama-hover: #1B4A5A;
-  --error: #B3261E;
+  color-scheme: light;
+  --latar: #fbf8e9;
+  --latar-bagian: #f8eed2;
+  --permukaan: #ffffff;
+  --teks: #3b110c;
+  --teks-redup: #5d3d3a;
+  --utama: #8b372b;
+  --utama-hover: #7f3126;
+  --aksen: #a05f1a;
+  --sorot: #dd5013;       /* hiasan saja: bukan untuk teks atau garis kolom */
+  --peringatan: #e9e4a6;
+  --hias: #bdb7fc;        /* hiasan saja: bukan untuk teks atau garis kolom */
+  --error: #da1c1c;
+  --garis-input: #96817f;
+  --garis: #d9cbb4;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -53,18 +58,21 @@ a { color: var(--utama); }
 .tombol {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 48px; padding: 0 24px; border: 0; border-radius: 10px;
-  background: var(--utama); color: #fff; font: inherit; font-weight: 700;
+  background: var(--utama); color: var(--latar); font: inherit; font-weight: 700;
   text-decoration: none; cursor: pointer;
 }
 .tombol:hover { background: var(--utama-hover); }
 .tombol:disabled, .tombol:disabled:hover, .tombol[aria-disabled="true"], .tombol[aria-disabled="true"]:hover {
-  background: var(--garis); color: var(--teks); cursor: not-allowed;
+  background: var(--latar-bagian); color: var(--teks-redup); box-shadow: inset 0 0 0 1px var(--garis-input); cursor: not-allowed;
 }
 .tombol.penuh { width: 100%; }
 .tombol.sekunder, .tombol.sekunder:hover { background: var(--permukaan); color: var(--utama); border: 2px solid var(--utama); }
 
 /* Panel setelah kirim */
 .panel { background: var(--permukaan); border-left: 4px solid var(--utama); padding: 16px; margin-top: 24px; }
+.centang-kirim { display: block; margin-bottom: 8px; }
+.centang-kirim path { fill: none; stroke: var(--utama); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; }
+.panel.belum-tercatat .centang-kirim { display: none; }
 .panel-tombol { display: grid; gap: 8px; margin-bottom: 8px; }
 #salin-manual { margin-top: 8px; }
 #salin-status { margin-top: 8px; }
@@ -78,17 +86,17 @@ a { color: var(--utama); }
 .langkah li::before {
   content: counter(l); position: absolute; left: 0; top: 0;
   width: 32px; height: 32px; border-radius: 50%;
-  background: var(--utama); color: #fff; font-weight: 700;
+  background: var(--hias); color: var(--teks); font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
 
 /* Form */
 .kartu {
   background: var(--permukaan); border: 1px solid var(--garis);
-  border-radius: 14px; padding: 24px 16px;
+  border-radius: 14px; padding: 24px 16px; overflow-x: clip;
 }
 fieldset { border: 0; margin: 0 0 32px; padding: 0; min-width: 0; }
-legend { padding: 0; margin-bottom: 16px; font-size: 20px; font-weight: 700; color: var(--utama); }
+legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
 .isian { margin-bottom: 16px; }
 .isian > label, .label { display: block; font-weight: 600; margin-bottom: 4px; }
 .bantuan { display: block; margin-top: 4px; font-size: 14px; color: var(--teks-redup); }
@@ -96,10 +104,33 @@ legend { padding: 0; margin-bottom: 16px; font-size: 20px; font-weight: 700; col
 .galat:not([hidden]) { display: flex; gap: 6px; }
 .galat::before {
   content: "!"; flex: none; width: 16px; height: 16px; margin-top: 2px; border-radius: 50%;
-  background: var(--error); color: #fff; font-size: 12px; font-weight: 700; line-height: 16px; text-align: center;
+  background: var(--error); color: var(--permukaan); font-size: 12px; font-weight: 700; line-height: 16px; text-align: center;
 }
 [aria-invalid="true"] { border-color: var(--error); }
 .catatan-privasi { font-size: 14px; color: var(--teks-redup); }
+
+/* Wizard: penunjuk langkah, judul langkah, Kembali, ringkasan */
+.penunjuk { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0 0 16px; padding: 0; }
+.penunjuk li { position: relative; flex: 1; height: 4px; border-radius: 4px; background: var(--garis); overflow: hidden; }
+.penunjuk li::after { content: ""; position: absolute; inset: 0; background: var(--utama); transform: scaleX(0); transform-origin: left; }
+.penunjuk li.selesai::after { transform: scaleX(1); }
+.penunjuk li[aria-current="step"] { height: 8px; }
+.penunjuk li[aria-current="step"]::after { background: var(--sorot); transform: scaleX(1); }
+.langkah-ke { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--teks-redup); }
+.judul-langkah { margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--utama); }
+.penjelas { margin: 0 0 8px; }
+.keterangan-wajib { margin: 0 0 24px; }
+label.wajib::after, legend.wajib::after { content: " *"; content: " *" / ""; }
+.kembali:hover { color: var(--utama-hover); }
+.kembali {
+  min-height: 44px; margin: 0 0 8px; padding: 0 8px 0 0; border: 0; background: none;
+  font: inherit; font-weight: 600; color: var(--utama); text-decoration: underline; cursor: pointer;
+}
+.judul-ringkasan { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+.ringkasan { margin: 0 0 24px; }
+.ringkasan div { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--garis); }
+.ringkasan dt { flex: 0 0 40%; font-size: 14px; color: var(--teks-redup); }
+.ringkasan dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
 
 input[type="text"], input[type="number"], input[type="date"], select, textarea {
   width: 100%; min-height: 44px; padding: 8px 12px;
@@ -108,6 +139,7 @@ input[type="text"], input[type="number"], input[type="date"], select, textarea {
   font: inherit; font-size: 16px;
 }
 textarea { min-height: 120px; resize: vertical; }
+:is(input[type="text"], input[type="number"], input[type="date"], select, textarea):focus:not([aria-invalid="true"]) { border-color: var(--utama); }
 ::placeholder { color: var(--teks-redup); opacity: 1; }
 .hitung { text-align: right; }
 
@@ -120,7 +152,7 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .segmented label small { font-weight: 400; font-size: 14px; }
 .segmented input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.segmented input:checked + label { background: var(--utama); color: #fff; border-color: var(--utama); }
+.segmented input:checked + label { background: var(--utama); color: var(--latar); border-color: var(--utama); }
 .segmented input:focus-visible + label { outline: 3px solid var(--utama); outline-offset: 2px; }
 
 .centang { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; margin-bottom: 8px; }
@@ -132,17 +164,14 @@ textarea { min-height: 120px; resize: vertical; }
 
 /* Kartu estimasi dan tombol kirim */
 .bar { margin-top: 24px; }
-.estimasi {
-  background: var(--permukaan); border: 2px solid var(--utama);
-  border-radius: 14px; padding: 16px; margin-bottom: 8px;
-}
-.estimasi .judul { margin: 0 0 4px; font-weight: 700; }
-.estimasi .angka { margin: 0 0 8px; font-size: 28px; font-weight: 800; color: var(--aksen); }
-.estimasi .pesan { margin: 0 0 8px; }
-.estimasi .peringatan { margin: 0; font-size: 14px; color: var(--teks-redup); }
+.estimasi { margin-bottom: 8px; }
+.estimasi .angka { margin: 0 0 4px; font-size: 28px; line-height: 1.25; font-weight: 800; color: var(--aksen); }
+.estimasi .pesan { margin: 0 0 4px; }
+.estimasi .peringatan { margin: 0; font-size: 14px; line-height: 1.4; color: var(--teks-redup); }
+.estimasi [hidden] { display: none !important; }
 .peringatan-ringkas, .peringatan-bawah { display: none; }
 .kotak-peringatan {
-  background: var(--permukaan); border-left: 4px solid var(--aksen);
+  background: var(--peringatan); border-left: 4px solid var(--aksen);
   padding: 12px 16px; color: var(--teks);
 }
 
@@ -158,6 +187,8 @@ textarea { min-height: 120px; resize: vertical; }
     margin: 24px -16px -24px; padding: 8px 16px 16px;
     background: var(--latar); border-top: 1px solid var(--garis);
   }
+  .estimasi .angka { font-size: 24px; }
+  .estimasi .pesan { font-size: 14px; line-height: 1.4; }
 }
 
 /* Terima dan tolak */
@@ -167,6 +198,62 @@ textarea { min-height: 120px; resize: vertical; }
 /* FAQ */
 .faq dt { font-weight: 700; color: var(--utama); margin-top: 16px; }
 .faq dd { margin: 4px 0 0; }
+
+/* Gerak: hanya bila pengguna tidak meminta gerak dikurangi. Semua keyframe hanya punya "from",
+   jadi tanpa animasi elemen tampil normal. Hanya transform, opacity, stroke-dashoffset, dan transisi warna. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes naik { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes masuk-maju { from { opacity: 0; transform: translateX(16px); } }
+  @keyframes masuk-mundur { from { opacity: 0; transform: translateX(-16px); } }
+  @keyframes muncul { from { opacity: 0; transform: translateY(-6px); } }
+  @keyframes pudar { from { opacity: 0; } }
+  @keyframes sorot { from { opacity: .8; } to { opacity: 0; } }
+  @keyframes panel-muncul { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes gambar { from { stroke-dashoffset: 1; } }
+
+  /* 1. Pembukaan */
+  #pembuka > * { animation: naik 250ms ease-out backwards; }
+  #pembuka > :nth-child(2) { animation-delay: 50ms; }
+  #pembuka > :nth-child(3) { animation-delay: 100ms; }
+
+  /* 2. Pindah langkah (data-arah diisi app.js; langkah 1 saat halaman dibuka tidak bergerak) */
+  form[data-arah="maju"] [data-langkah]:not([hidden]) { animation: masuk-maju 200ms ease-out backwards; }
+  form[data-arah="mundur"] [data-langkah]:not([hidden]) { animation: masuk-mundur 200ms ease-out backwards; }
+
+  /* 3. Bilah kemajuan */
+  .penunjuk li::after { transition: transform 250ms ease-out, background-color 200ms ease-out; }
+
+  /* 4. Kolom dinamis (.baru diisi app.js) */
+  .isian.baru { animation: muncul 180ms ease-out backwards; }
+
+  /* 5. Tombol */
+  .tombol { transition: background-color 120ms ease-out, color 120ms ease-out, transform 120ms ease-out; }
+  .tombol:active:not(:disabled):not([aria-disabled="true"]) { transform: scale(.98); }
+  .kembali, .segmented label { transition: background-color 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out; }
+
+  /* 6. Kolom isian: hanya border; garis fokus (outline) tidak ditunda */
+  input[type="text"], input[type="number"], input[type="date"], select, textarea { transition: border-color 150ms ease-out; }
+
+  /* 7. Pesan kesalahan */
+  .galat:not([hidden]) { animation: pudar 150ms ease-out backwards; }
+
+  /* 8. Sorotan kisaran estimasi: elemen .angka dibuat baru tiap angka berubah, jadi animasi mulai sendiri */
+  .estimasi .angka { position: relative; isolation: isolate; }
+  .estimasi .angka::before {
+    content: ""; position: absolute; inset: -2px -6px; z-index: -1; border-radius: 6px;
+    background: var(--peringatan); opacity: 0; animation: sorot 250ms ease-out;
+  }
+
+  /* 10. Panel tercatat */
+  .panel:not([hidden]) { animation: panel-muncul 220ms ease-out backwards; }
+  .panel:not([hidden]) .centang-kirim path { animation: gambar 250ms ease-out 120ms backwards; }
+}
+
+/* 9. Bar HP naik halus saat pertama terlihat (.bar-masuk diisi app.js) */
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  @keyframes bar-naik { from { opacity: 0; transform: translateY(16px); } }
+  .bar.bar-masuk { animation: bar-naik 220ms ease-out backwards; }
+}
 
 /* Footer */
 .footer { border-top: 1px solid var(--garis); padding: 32px 0 48px; font-size: 14px; color: var(--teks-redup); }

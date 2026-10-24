@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
   <title>Jade: Estimasi Biaya Pendampingan Tugas</title>
   <meta name="description" content="Hitung estimasi biaya pendampingan tugas untuk pelajar SMA dan mahasiswa. Isi form, lihat estimasinya, kirim lewat WhatsApp.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,46 +41,50 @@
 
   <section id="form">
     <h2 class="sr-only">Form pesanan</h2>
-    <!-- Kerangka saja: belum berfungsi (Tahap 2 dan seterusnya) -->
     <div role="status">
       <p class="kotak-peringatan" id="memuat">Sebentar ya, sedang memuat daftar tugas dan harga terbaru...</p>
       <p class="kotak-peringatan" id="data-gagal" hidden></p>
     </div>
     <form class="kartu" novalidate inert>
 
-      <fieldset>
-        <legend>Jenjang</legend>
-        <div class="segmented">
-          <input type="radio" name="jenjang" id="jenjang-pelajar" value="Pelajar"><label for="jenjang-pelajar">Pelajar <small>SMA/SMK/MA</small></label>
-          <input type="radio" name="jenjang" id="jenjang-mahasiswa" value="Mahasiswa"><label for="jenjang-mahasiswa">Mahasiswa <small>D3/D4/S1</small></label>
-        </div>
-      </fieldset>
+      <ol class="penunjuk" id="penunjuk"></ol>
+      <p class="langkah-ke" id="langkah-ke"></p>
+      <h3 class="judul-langkah" id="judul-langkah" tabindex="-1"></h3>
+      <p class="penjelas" id="penjelas-langkah"></p>
+      <p class="bantuan keterangan-wajib">* wajib diisi</p>
+      <p class="sr-only" id="umum-langkah" role="status"></p>
 
-      <fieldset>
-        <legend>Tentang tugasmu</legend>
+      <div data-langkah="0">
+        <fieldset>
+          <legend class="wajib">Jenjang</legend>
+          <div class="segmented">
+            <input type="radio" name="jenjang" id="jenjang-pelajar" value="Pelajar"><label for="jenjang-pelajar">Pelajar <small>SMA/SMK/MA</small></label>
+            <input type="radio" name="jenjang" id="jenjang-mahasiswa" value="Mahasiswa"><label for="jenjang-mahasiswa">Mahasiswa <small>D3/D4/S1</small></label>
+          </div>
+        </fieldset>
 
         <div class="isian">
-          <label for="prodi">Prodi/jurusan</label>
+          <label class="wajib" for="prodi">Prodi/jurusan</label>
           <input type="text" id="prodi" name="prodi" maxlength="80" placeholder="Contoh: Ekonomi Pertanian dan Agribisnis">
         </div>
         <div class="isian">
-          <label for="semester">Semester</label>
+          <label class="wajib" for="semester">Semester</label>
           <input type="number" id="semester" name="semester" min="1" max="14" step="1" inputmode="numeric" placeholder="Contoh: 3">
         </div>
         <div class="isian">
-          <label for="matkul">Mata kuliah</label>
+          <label class="wajib" for="matkul">Mata kuliah</label>
           <input type="text" id="matkul" name="matkul" maxlength="80" placeholder="Contoh: Pengantar Ilmu Ekonomi">
         </div>
 
         <div class="isian">
-          <label for="kelas">Kelas</label>
+          <label class="wajib" for="kelas">Kelas</label>
           <select id="kelas" name="kelas">
             <option value="">Pilih kelas</option>
             <option>10</option><option>11</option><option>12</option>
           </select>
         </div>
         <div class="isian">
-          <label for="mapel">Mata pelajaran</label>
+          <label class="wajib" for="mapel">Mata pelajaran</label>
           <select id="mapel" name="mapel">
             <option value="">Pilih mata pelajaran</option>
             <option>Bahasa Indonesia</option><option>Bahasa Inggris</option><option>Matematika</option>
@@ -89,100 +94,109 @@
           </select>
         </div>
         <div class="isian" hidden>
-          <label for="mapel-lain">Mata pelajaran (ketik sendiri)</label>
+          <label class="wajib" for="mapel-lain">Mata pelajaran (ketik sendiri)</label>
           <input type="text" id="mapel-lain" name="mapel_lain" maxlength="80">
         </div>
+      </div>
 
+      <div data-langkah="1" hidden>
         <div class="isian">
-          <label for="jenis">Jenis tugas</label>
+          <label class="wajib" for="jenis">Jenis tugas</label>
           <select id="jenis" name="jenis" aria-describedby="jenis-bantuan">
             <option value="">Pilih jenis tugas</option>
           </select>
           <span class="bantuan" id="jenis-bantuan">Tidak ada yang cocok? Pilih Tugas lainnya.</span>
         </div>
         <div class="isian" hidden>
-          <label for="jenis-lain">Nama/jenis tugas</label>
+          <label class="wajib" for="jenis-lain">Nama/jenis tugas</label>
           <input type="text" id="jenis-lain" name="jenis_lain" maxlength="100" placeholder="Contoh: Resume film dokumenter">
         </div>
         <div class="isian">
-          <label for="target">Target output</label>
+          <label class="wajib" for="target">Target output</label>
           <input type="number" id="target" name="target" min="1" max="200" step="1" inputmode="numeric" aria-describedby="target-bantuan">
           <span class="bantuan" id="target-bantuan"></span>
         </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Lampiran atau bahan</legend>
         <div class="isian">
-          <label for="jml-file">Jumlah file lampiran</label>
-          <input type="number" id="jml-file" name="jml_file" min="0" max="20" step="1" inputmode="numeric" aria-describedby="file-bantuan">
-          <span class="bantuan" id="file-bantuan">Lampiran dikirim lewat WhatsApp setelah kamu menekan tombol kirim.</span>
-        </div>
-        <div class="isian">
-          <label for="total-hlm">Total halaman semua lampiran</label>
-          <input type="number" id="total-hlm" name="total_hlm" min="0" max="1000" step="1" inputmode="numeric" aria-describedby="hlm-bantuan">
-          <span class="bantuan" id="hlm-bantuan"><span data-harga="lampiranGratis">{{lampiranGratis}}</span> halaman pertama gratis. Selebihnya Rp<span data-harga="tarifBlok">{{tarifBlok}}</span> per <span data-harga="blokLampiran">{{blokLampiran}}</span> halaman.</span>
-        </div>
-        <p class="catatan-privasi">Jangan kirim KTP, nomor rekening, atau password. Lampiran hanya dipakai untuk pesananmu.</p>
-      </fieldset>
-
-      <fieldset>
-        <legend>Kebutuhanmu</legend>
-        <div class="isian">
-          <label for="kebutuhan">Kebutuhan detail</label>
-          <textarea id="kebutuhan" name="kebutuhan" maxlength="1000" placeholder="Ceritakan yang kamu butuhkan: topik, sudut pandang, hal yang harus ada, contoh yang kamu suka."></textarea>
-          <span class="bantuan hitung">0/1000</span>
-        </div>
-        <div class="isian">
-          <label for="ketentuan">Ketentuan tugas</label>
-          <textarea id="ketentuan" name="ketentuan" maxlength="1000" placeholder="Contoh: format APA 7, font Times 12, maksimal 5 halaman. Kalau tidak ada, tulis tanda minus (-)."></textarea>
-          <span class="bantuan hitung">0/1000</span>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Tenggat dan format</legend>
-        <div class="isian">
-          <label for="tenggat">Tenggat</label>
-          <input type="date" id="tenggat" name="tenggat" aria-describedby="tenggat-bantuan">
-          <span class="bantuan" id="tenggat-bantuan"></span>
-        </div>
-        <div class="isian">
-          <label for="format">Format output</label>
+          <label class="wajib" for="format">Format output</label>
           <select id="format" name="format">
             <option value="">Pilih format</option>
             <option value="Teks">Teks (di chat WhatsApp)</option><option>Word</option><option>PDF</option><option>PPT</option><option>Excel</option>
           </select>
         </div>
-      </fieldset>
 
-      <fieldset>
-        <legend>Tambahan (opsional)</legend>
-        <div class="centang">
-          <input type="checkbox" id="sitasi" name="sitasi">
-          <label for="sitasi">Sitasi dan referensi kami periksa satu per satu (maks 10 referensi). +Rp<span data-harga="tambahanSitasi">{{tambahanSitasi}}</span></label>
-        </div>
-        <div class="centang">
-          <input type="checkbox" id="penjelasan" name="penjelasan">
-          <label for="penjelasan">Kami jelaskan isi hasilnya dan poin kuncinya supaya kamu paham. +Rp<span data-harga="tambahanPenjelasan">{{tambahanPenjelasan}}</span></label>
-        </div>
-      </fieldset>
+        <fieldset>
+          <legend>Tambahan (opsional)</legend>
+          <div class="centang">
+            <input type="checkbox" id="sitasi" name="sitasi">
+            <label for="sitasi">Sitasi dan referensi kami periksa satu per satu (maks 10 referensi). +Rp<span data-harga="tambahanSitasi">{{tambahanSitasi}}</span></label>
+          </div>
+          <div class="centang">
+            <input type="checkbox" id="penjelasan" name="penjelasan">
+            <label for="penjelasan">Kami jelaskan isi hasilnya dan poin kuncinya supaya kamu paham. +Rp<span data-harga="tambahanPenjelasan">{{tambahanPenjelasan}}</span></label>
+          </div>
+        </fieldset>
+      </div>
 
-      <fieldset>
-        <legend>Persetujuan</legend>
-        <div class="centang">
-          <input type="checkbox" id="setuju" name="setuju">
-          <label for="setuju">Aku paham ini estimasi awal, dan aku bertanggung jawab memeriksa isi hasilnya serta mengikuti aturan sekolah atau kampusku.</label>
+      <div data-langkah="2" hidden>
+        <div class="isian">
+          <label class="wajib" for="jml-file">Jumlah file lampiran</label>
+          <input type="number" id="jml-file" name="jml_file" min="0" max="20" step="1" inputmode="numeric" aria-describedby="file-bantuan">
+          <span class="bantuan" id="file-bantuan">Lampiran dikirim lewat WhatsApp setelah kamu menekan tombol kirim.</span>
         </div>
-      </fieldset>
+        <div class="isian">
+          <label class="wajib" for="total-hlm">Total halaman semua lampiran</label>
+          <input type="number" id="total-hlm" name="total_hlm" min="0" max="1000" step="1" inputmode="numeric" aria-describedby="hlm-bantuan">
+          <span class="bantuan" id="hlm-bantuan"><span data-harga="lampiranGratis">{{lampiranGratis}}</span> halaman pertama gratis. Selebihnya Rp<span data-harga="tarifBlok">{{tarifBlok}}</span> per <span data-harga="blokLampiran">{{blokLampiran}}</span> halaman.</span>
+        </div>
+        <p class="catatan-privasi">Jangan kirim KTP, nomor rekening, atau password. Lampiran hanya dipakai untuk pesananmu.</p>
+        <div class="isian">
+          <label class="wajib" for="tenggat">Tenggat</label>
+          <input type="date" id="tenggat" name="tenggat" aria-describedby="tenggat-bantuan">
+          <span class="bantuan" id="tenggat-bantuan"></span>
+        </div>
+        <div role="status"><p class="kotak-peringatan" id="catatan-hari-ini-3" hidden></p></div>
+      </div>
 
-      <!-- Kolom jebakan anti-spam -->
+      <div data-langkah="3" hidden>
+        <div role="status">
+          <p class="kotak-peringatan" id="catatan-lainnya" hidden></p>
+          <p class="kotak-peringatan" id="catatan-hari-ini" hidden></p>
+        </div>
+        <h4 class="judul-ringkasan">Ringkasan pesananmu</h4>
+        <dl class="ringkasan" id="ringkasan"></dl>
+
+        <div class="isian">
+          <label class="wajib" for="kebutuhan">Kebutuhan detail</label>
+          <textarea id="kebutuhan" name="kebutuhan" maxlength="1000" placeholder="Ceritakan yang kamu butuhkan: topik, sudut pandang, hal yang harus ada, contoh yang kamu suka."></textarea>
+          <span class="bantuan hitung">0/1000</span>
+        </div>
+        <div class="isian">
+          <label class="wajib" for="ketentuan">Ketentuan tugas</label>
+          <textarea id="ketentuan" name="ketentuan" maxlength="1000" placeholder="Contoh: format APA 7, font Times 12, maksimal 5 halaman. Kalau tidak ada, tulis tanda minus (-)."></textarea>
+          <span class="bantuan hitung">0/1000</span>
+        </div>
+
+        <p class="peringatan peringatan-bawah">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
+
+        <fieldset>
+          <legend class="sr-only">Persetujuan</legend>
+          <div class="centang">
+            <input type="checkbox" id="setuju" name="setuju">
+            <label class="wajib" for="setuju">Aku paham ini estimasi awal, dan aku bertanggung jawab memeriksa isi hasilnya serta mengikuti aturan sekolah atau kampusku.</label>
+          </div>
+        </fieldset>
+      </div>
+
+      <button type="button" class="kembali" id="kembali" hidden>Kembali</button>
+
+      <!-- Kolom jebakan anti-spam: di luar semua langkah -->
       <div class="jebakan" aria-hidden="true">
         <input type="text" name="website" tabindex="-1" autocomplete="off">
       </div>
 
       <div role="status">
       <div class="panel" id="panel-kirim" hidden>
+        <svg class="centang-kirim" aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="28" height="28"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg>
         <p id="panel-teks"></p>
         <div class="panel-tombol">
           <a class="tombol" id="wa-lagi" href="#">Buka WhatsApp lagi</a>
@@ -193,18 +207,16 @@
       <p class="bantuan" id="salin-status" role="status"></p>
       <textarea id="salin-manual" readonly hidden aria-label="Isi pesan WhatsApp"></textarea>
 
-      <p class="peringatan peringatan-bawah">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
-
       <div class="bar">
         <div class="estimasi">
-          <p class="judul">Estimasi biaya</p>
+          <p class="judul sr-only">Estimasi biaya</p>
           <div aria-live="polite">
             <p class="pesan">Pilih jenis tugas untuk melihat estimasi.</p>
           </div>
           <p class="peringatan peringatan-penuh">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
           <p class="peringatan peringatan-ringkas">Estimasi awal, harga final menunggu konfirmasi dari kami.</p>
         </div>
-        <button type="submit" class="tombol penuh" aria-disabled="true">Kirim ke WhatsApp</button>
+        <button type="submit" class="tombol penuh" aria-disabled="false">Lanjut</button>
         <p class="galat" id="kirim-galat" role="alert" hidden></p>
       </div>
 
@@ -267,6 +279,7 @@
 <script src="assets/js/muat-config.js"></script>
 <script src="assets/js/pricing.js"></script>
 <script src="assets/js/pesan.js"></script>
+<script src="assets/js/langkah.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
