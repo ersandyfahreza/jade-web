@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jade: Estimasi Biaya Pendampingan Tugas</title>
+  <meta name="description" content="Hitung estimasi biaya pendampingan tugas untuk pelajar SMA dan mahasiswa. Isi form, lihat estimasinya, kirim lewat WhatsApp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="wrap">
+    <a class="logo" href="#">Jade</a>
+    <a class="tautan" href="#form">Pesan sekarang</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="pembuka">
+    <h1>Estimasi biaya pendampingan tugasmu, dalam 3 menit</h1>
+    <p>Pilih jenis tugas, isi kebutuhanmu, lihat estimasinya, lalu kirim ke kami lewat WhatsApp. Kami bantu menyusun draf bahan belajar, kamu yang memeriksa dan memahaminya.</p>
+    <a class="tombol" href="#form">Mulai pesan</a>
+  </section>
+
+  <section id="cara-kerja">
+    <h2>Cara kerjanya</h2>
+    <ol class="langkah">
+      <li><strong>Isi form.</strong> Pilih tugas dan ceritakan kebutuhanmu.</li>
+      <li><strong>Kirim ke WhatsApp.</strong> Pesan terisi otomatis, tinggal kirim, lalu kirim lampiranmu.</li>
+      <li><strong>Kami konfirmasi.</strong> Kami baca kebutuhanmu, lalu kabari harga final dan perkiraan selesai.</li>
+      <li><strong>Bayar DP, kami kerjakan.</strong> Kamu terima hasilnya, boleh revisi, lalu pelunasan.</li>
+    </ol>
+  </section>
+
+  <section id="form">
+    <h2 class="sr-only">Form pesanan</h2>
+    <!-- Kerangka saja: belum berfungsi (Tahap 2 dan seterusnya) -->
+    <form class="kartu" novalidate>
+
+      <fieldset>
+        <legend>Jenjang</legend>
+        <div class="segmented">
+          <label><input type="radio" name="jenjang" value="Pelajar"> Pelajar <small>SMA/SMK/MA</small></label>
+          <label><input type="radio" name="jenjang" value="Mahasiswa"> Mahasiswa <small>D3/D4/S1</small></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Tentang tugasmu</legend>
+
+        <div class="isian">
+          <label for="prodi">Prodi/jurusan</label>
+          <input type="text" id="prodi" name="prodi" maxlength="80" placeholder="Contoh: Ekonomi Pertanian dan Agribisnis">
+        </div>
+        <div class="isian">
+          <label for="semester">Semester</label>
+          <input type="number" id="semester" name="semester" min="1" max="14" step="1" inputmode="numeric" placeholder="Contoh: 3">
+        </div>
+        <div class="isian">
+          <label for="matkul">Mata kuliah</label>
+          <input type="text" id="matkul" name="matkul" maxlength="80" placeholder="Contoh: Pengantar Ilmu Ekonomi">
+        </div>
+
+        <div class="isian">
+          <label for="kelas">Kelas</label>
+          <select id="kelas" name="kelas">
+            <option value="">Pilih kelas</option>
+            <option>10</option><option>11</option><option>12</option>
+          </select>
+        </div>
+        <div class="isian">
+          <label for="mapel">Mata pelajaran</label>
+          <select id="mapel" name="mapel">
+            <option value="">Pilih mata pelajaran</option>
+            <option>Bahasa Indonesia</option><option>Bahasa Inggris</option><option>Matematika</option>
+            <option>Fisika</option><option>Kimia</option><option>Biologi</option><option>Ekonomi</option>
+            <option>Geografi</option><option>Sosiologi</option><option>Sejarah</option><option>PPKn</option>
+            <option>Informatika</option><option>Seni Budaya</option><option>Lainnya</option>
+          </select>
+        </div>
+        <div class="isian" hidden>
+          <label for="mapel-lain">Mata pelajaran (ketik sendiri)</label>
+          <input type="text" id="mapel-lain" name="mapel_lain" maxlength="80">
+        </div>
+
+        <div class="isian">
+          <label for="jenis">Jenis tugas</label>
+          <select id="jenis" name="jenis" aria-describedby="jenis-bantuan">
+            <option value="">Pilih jenis tugas</option>
+          </select>
+          <span class="bantuan" id="jenis-bantuan">Tidak ada yang cocok? Pilih Tugas lainnya.</span>
+        </div>
+        <div class="isian" hidden>
+          <label for="jenis-lain">Nama/jenis tugas</label>
+          <input type="text" id="jenis-lain" name="jenis_lain" maxlength="100" placeholder="Contoh: Resume film dokumenter">
+        </div>
+        <div class="isian">
+          <label for="target">Target output</label>
+          <input type="number" id="target" name="target" min="1" max="200" step="1" inputmode="numeric">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Lampiran atau bahan</legend>
+        <div class="isian">
+          <label for="jml-file">Jumlah file lampiran</label>
+          <input type="number" id="jml-file" name="jml_file" min="0" max="20" step="1" inputmode="numeric" aria-describedby="file-bantuan">
+          <span class="bantuan" id="file-bantuan">Lampiran dikirim lewat WhatsApp setelah kamu menekan tombol kirim.</span>
+        </div>
+        <div class="isian">
+          <label for="total-hlm">Total halaman semua lampiran</label>
+          <input type="number" id="total-hlm" name="total_hlm" min="0" max="1000" step="1" inputmode="numeric" aria-describedby="hlm-bantuan">
+          <span class="bantuan" id="hlm-bantuan"><span data-harga="lampiranGratis">{{lampiranGratis}}</span> halaman pertama gratis. Selebihnya Rp<span data-harga="tarifBlok">{{tarifBlok}}</span> per <span data-harga="blokLampiran">{{blokLampiran}}</span> halaman.</span>
+        </div>
+        <p class="catatan-privasi">Jangan kirim KTP, nomor rekening, atau password. Lampiran hanya dipakai untuk pesananmu.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Kebutuhanmu</legend>
+        <div class="isian">
+          <label for="kebutuhan">Kebutuhan detail</label>
+          <textarea id="kebutuhan" name="kebutuhan" maxlength="1000" placeholder="Ceritakan yang kamu butuhkan: topik, sudut pandang, hal yang harus ada, contoh yang kamu suka."></textarea>
+          <span class="bantuan hitung">0/1000</span>
+        </div>
+        <div class="isian">
+          <label for="ketentuan">Ketentuan tugas</label>
+          <textarea id="ketentuan" name="ketentuan" maxlength="1000" placeholder="Contoh: format APA 7, font Times 12, maksimal 5 halaman. Kalau tidak ada, tulis tanda minus (-)."></textarea>
+          <span class="bantuan hitung">0/1000</span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Tenggat dan format</legend>
+        <div class="isian">
+          <label for="tenggat">Tenggat</label>
+          <input type="date" id="tenggat" name="tenggat">
+        </div>
+        <div class="isian">
+          <label for="format">Format output</label>
+          <select id="format" name="format">
+            <option value="">Pilih format</option>
+            <option>Teks (di chat WhatsApp)</option><option>Word</option><option>PDF</option><option>PPT</option><option>Excel</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Tambahan (opsional)</legend>
+        <div class="centang">
+          <input type="checkbox" id="sitasi" name="sitasi">
+          <label for="sitasi">Sitasi dan referensi kami periksa satu per satu (maks 10 referensi). +Rp<span data-harga="tambahanSitasi">{{tambahanSitasi}}</span></label>
+        </div>
+        <div class="centang">
+          <input type="checkbox" id="penjelasan" name="penjelasan">
+          <label for="penjelasan">Kami jelaskan isi hasilnya dan poin kuncinya supaya kamu paham. +Rp<span data-harga="tambahanPenjelasan">{{tambahanPenjelasan}}</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Persetujuan</legend>
+        <div class="centang">
+          <input type="checkbox" id="setuju" name="setuju">
+          <label for="setuju">Aku paham ini estimasi awal, dan aku bertanggung jawab memeriksa isi hasilnya serta mengikuti aturan sekolah atau kampusku.</label>
+        </div>
+      </fieldset>
+
+      <!-- Kolom jebakan anti-spam -->
+      <div class="jebakan" aria-hidden="true">
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div class="bar">
+        <div class="estimasi">
+          <p class="judul">Estimasi biaya</p>
+          <div aria-live="polite">
+            <p class="pesan">Pilih jenis tugas untuk melihat estimasi.</p>
+          </div>
+          <p class="peringatan">Ini estimasi awal. Harga final dikonfirmasi setelah kebutuhanmu kami baca, dan masih bisa didiskusikan.</p>
+        </div>
+        <button type="submit" class="tombol penuh" disabled>Kirim ke WhatsApp</button>
+      </div>
+
+    </form>
+  </section>
+
+  <section id="terima-tolak">
+    <h2>Yang kami terima</h2>
+    <ul class="daftar">
+      <li>Kerangka dan outline</li>
+      <li>Ringkasan dan resume</li>
+      <li>Draf esai, makalah, laporan, dan proposal</li>
+      <li>PPT</li>
+      <li>Soal latihan dan pembahasan</li>
+      <li>Olah data</li>
+      <li>Perbaikan bahasa dan format</li>
+      <li>CV dan surat</li>
+      <li>Coding tugas kecil</li>
+    </ul>
+    <h2>Yang tidak kami terima</h2>
+    <ul class="daftar">
+      <li>Skripsi atau tesis penuh</li>
+      <li>Soal ujian atau kuis yang sedang berlangsung</li>
+      <li>Tugas yang melarang penggunaan AI</li>
+      <li>Memalsukan data atau referensi</li>
+      <li>Mengakali pengecekan plagiat</li>
+    </ul>
+  </section>
+
+  <section id="faq">
+    <h2>Pertanyaan umum</h2>
+    <dl class="faq">
+      <dt>Harganya bisa nego?</dt>
+      <dd>Bisa didiskusikan. Angka di web adalah estimasi awal, harga final kami tentukan setelah membaca kebutuhanmu.</dd>
+      <dt>Bayarnya bagaimana?</dt>
+      <dd>DP <span data-harga="dp">{{dp}}</span>% setelah harga final disepakati, pelunasan setelah hasil kamu terima.</dd>
+      <dt>Boleh revisi?</dt>
+      <dd>Ya, <span data-harga="revisiGratis">{{revisiGratis}}</span> kali revisi gratis sesuai kebutuhan awal. Revisi tambahan Rp<span data-harga="revisiTambahan">{{revisiTambahan}}</span> per kali.</dd>
+      <dt>Lampiranku aman?</dt>
+      <dd>Lampiran hanya dipakai untuk pesananmu dan dihapus setelah pesanan selesai. Jangan kirim data pribadi sensitif.</dd>
+      <dt>Apakah hasilnya pasti benar?</dt>
+      <dd>Hasil dibantu AI lalu diperiksa tim kami, tapi tetap periksa isinya sebelum dipakai. Kami tidak menjamin hasil bebas dari kesalahan.</dd>
+      <dt>Tugasku tidak ada di daftar</dt>
+      <dd>Pilih "Tugas lainnya" dan ceritakan kebutuhanmu. Kami kabari harga pastinya.</dd>
+    </dl>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Dibantu AI dan diperiksa oleh tim kami. Kamu tetap bertanggung jawab memeriksa isinya dan mengikuti aturan sekolah atau kampusmu.</p>
+    <p>Jangan kirim KTP, nomor rekening, atau password. Lampiran hanya dipakai untuk pesananmu.</p>
+    <p><a href="https://wa.me/6289619114292">Hubungi kami lewat WhatsApp</a></p>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+</body>
+</html>
