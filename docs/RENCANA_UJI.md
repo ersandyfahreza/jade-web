@@ -6,6 +6,8 @@ Gunanya: memastikan harga tidak salah hitung, web nyaman di HP, dan pesanan tida
 
 Halaman `tests/uji-harga.html` memuat semua baris di bawah, menghitung dengan `pricing.js` dan `data/fallback.js`, lalu menampilkan **OK** atau **CEK** per baris. Semua harus OK sebelum rilis.
 
+Uji logika server (validasi, awalan `'`, kolom jebakan, kode pesanan, duplikat): jalankan `node tests/uji-server.js`. Semua baris harus OK.
+
 Nilai awal harga (Template): lampiran gratis 20 halaman, Rp3.000 per 10 halaman, faktor tenggat 0 hari ×1,5, 1-2 hari ×1,25, 3-4 hari ×1,1, 5 hari atau lebih ×1,0, format di luar standar Rp5.000, sitasi Rp15.000, penjelasan Rp10.000, pengali atas ×1,2, tugas lainnya ×0,8 sampai ×1,6, pembulatan ke atas Rp1.000.
 
 Semua angka dihitung dengan program memakai rumus yang sama, lalu dicocokkan dengan hitungan manual.

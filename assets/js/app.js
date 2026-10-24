@@ -16,6 +16,7 @@
     panjang: (n) => `Maksimal ${n} karakter.`,
     tenggat: "Tenggat tidak boleh sebelum hari ini.",
     setuju: "Centang dulu persetujuan ini untuk melanjutkan.",
+    terlaluBanyak: "Tunggu sebentar, lalu coba lagi.",
     hargaGagal: "Harga terbaru belum bisa dimuat, kami pakai data cadangan. Harga final tetap kami konfirmasi lewat WhatsApp."
   };
 
@@ -223,16 +224,72 @@
 
   let pesanTerakhir = "";
 
-  function kirim() {
+  let sedangKirim = false;
+  const KUNCI_JEDA = "jade_kirim_terakhir";
+  const waktuKirimTerakhir = () => {
+    try { return Number(localStorage.getItem(KUNCI_JEDA)) || 0; } catch (err) { return 0; }
+  };
+
+  // Mengembalikan kode dari server, atau null bila gagal, ditolak, atau lewat batas waktu
+  async function catatKeSheets(data) {
+    const batal = new AbortController();
+    const timer = setTimeout(() => batal.abort(), CONFIG.batasWaktuMs);
+    try {
+      const r = await fetch(CONFIG.appsScriptUrl, {
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(data), redirect: "follow", signal: batal.signal
+      });
+      const j = await r.json();
+      return j.ok && /^JD-\d{4,}$/.test(j.kode) ? j.kode : null;
+    } catch (err) {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function kirim() {
+    if (sedangKirim) return;
+    const galatKirim = $("kirim-galat");
+    galatKirim.hidden = true;
+    if (Date.now() - waktuKirimTerakhir() < CONFIG.jedaKirimMs) {
+      galatKirim.textContent = PESAN.terlaluBanyak;
+      galatKirim.hidden = false;
+      return;
+    }
+    sedangKirim = true;
+    form.inert = true; // kunci form selama mengirim agar isian dan tombol tidak bisa diubah
     tombolKirim.textContent = "Mencatat pesananmu...";
     tombolKirim.setAttribute("aria-disabled", "true");
     // Cadangan bila penyusunan pesan error tak terduga: WhatsApp tetap terbuka (CLAUDE.md aturan 4)
     let tautan = tautanWA(CONFIG.nomorWhatsApp, "Halo Jade, aku mau pesan layanan pendampingan.");
     try {
-      // Tahap 6: catat ke Sheets lewat Apps Script (batas config.batasWaktuMs). Sampai alamatnya terisi, anggap gagal tanpa menunggu.
-      const kode = buatKodeSementara();
       const { sisa, hasil } = hitungSekarang();
       const tugas = tugasTerpilih();
+      const mhs = jenjang() === "Mahasiswa";
+      const ok = hasil.status === "ok";
+      try { localStorage.setItem(KUNCI_JEDA, String(Date.now())); } catch (err) { /* tanpa penyimpanan, jeda hanya berlaku di server */ }
+      const kodeServer = await catatKeSheets({
+        website: form.elements.website.value,
+        jenjang: jenjang(),
+        prodiKelas: mhs ? $("prodi").value.trim() : `Kelas ${$("kelas").value}`,
+        semester: mhs ? Number($("semester").value) : "",
+        matkul: mhs ? $("matkul").value.trim() : ($("mapel").value === "Lainnya" ? $("mapel-lain").value.trim() : $("mapel").value),
+        tugas: $("jenis").value,
+        tugasLainnya: tugasLainnya() ? $("jenis-lain").value.trim() : "",
+        jumlahFile: Number($("jml-file").value),
+        totalHalaman: jmlFileNol() ? 0 : Number($("total-hlm").value),
+        target: Number($("target").value),
+        format: $("format").value,
+        tenggat: $("tenggat").value,
+        opsi: [$("sitasi").checked && "Sitasi diperiksa", $("penjelasan").checked && "Penjelasan hasil"].filter(Boolean),
+        kebutuhan: $("kebutuhan").value.trim(),
+        ketentuan: $("ketentuan").value.trim(),
+        // Estimasi tidak ditampilkan (lampiran > batas atau data harga belum terbaca): dicatat 0
+        estimasiBawah: ok ? hasil.bawah : 0,
+        estimasiAtas: ok ? hasil.atas : 0
+      });
+      const kode = kodeServer || buatKodeSementara();
       pesanTerakhir = susunPesanWA({
         kode, jenjang: jenjang(),
         prodi: $("prodi").value.trim(), semester: Number($("semester").value), matkul: $("matkul").value.trim(),
@@ -245,9 +302,16 @@
         kebutuhan: $("kebutuhan").value, ketentuan: $("ketentuan").value,
         bawah: hasil.bawah, atas: hasil.status === "ok" ? hasil.atas : null,
         hargaBelumTerbaca: hasil.status !== "ok" && hasil.status !== "hubungi",
-        batasLampiran: config.harga.batasLampiran, belumTercatat: true
+        batasLampiran: config.harga.batasLampiran, belumTercatat: !kodeServer
       });
-      $("panel-teks").textContent = `Pesananmu belum tercatat otomatis, tapi tetap bisa kamu kirim lewat WhatsApp. Kode sementara: ${kode}`;
+      if (kodeServer) {
+        const tebal = document.createElement("strong");
+        tebal.textContent = kode;
+        $("panel-teks").replaceChildren("Pesananmu tercatat dengan kode ", tebal,
+          ". WhatsApp akan terbuka. Kirim pesannya, lalu kirim lampiranmu di chat yang sama.");
+      } else {
+        $("panel-teks").textContent = `Pesananmu belum tercatat otomatis, tapi tetap bisa kamu kirim lewat WhatsApp. Kode sementara: ${kode}`;
+      }
       tautan = tautanWA(CONFIG.nomorWhatsApp, pesanTerakhir);
       $("wa-lagi").href = tautan;
       $("salin-status").hidden = true;
@@ -255,6 +319,8 @@
       $("panel-kirim").hidden = false;
     } finally {
       window.location.href = tautan;
+      sedangKirim = false;
+      form.inert = false;
       perbarui(); // mengembalikan teks dan keadaan tombol
     }
   }
