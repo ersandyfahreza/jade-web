@@ -57,7 +57,7 @@ a { color: var(--utama); }
   text-decoration: none; cursor: pointer;
 }
 .tombol:hover { background: var(--utama-hover); }
-.tombol:disabled, .tombol:disabled:hover {
+.tombol:disabled, .tombol:disabled:hover, .tombol[aria-disabled="true"], .tombol[aria-disabled="true"]:hover {
   background: var(--garis); color: var(--teks-redup); cursor: not-allowed;
 }
 .tombol.penuh { width: 100%; }
@@ -84,6 +84,13 @@ legend { padding: 0; margin-bottom: 16px; font-size: 20px; font-weight: 700; col
 .isian { margin-bottom: 16px; }
 .isian > label, .label { display: block; font-weight: 600; margin-bottom: 4px; }
 .bantuan { display: block; margin-top: 4px; font-size: 14px; color: var(--teks-redup); }
+.galat { margin-top: 4px; font-size: 14px; color: var(--error); }
+.galat:not([hidden]) { display: flex; gap: 6px; }
+.galat::before {
+  content: "!"; flex: none; width: 16px; height: 16px; margin-top: 2px; border-radius: 50%;
+  background: var(--error); color: #fff; font-size: 12px; font-weight: 700; line-height: 16px; text-align: center;
+}
+[aria-invalid="true"] { border-color: var(--error); }
 .catatan-privasi { font-size: 14px; color: var(--teks-redup); }
 
 input[type="text"], input[type="number"], input[type="date"], select, textarea {
