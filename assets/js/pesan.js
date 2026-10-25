@@ -69,7 +69,7 @@ function susunPesanWA(d) {
     `Target output: ${d.target} ${d.satuan}`,
     `Format output: ${d.format}`,
     `Tenggat: ${tanggalIndonesia(d.tenggat)} (${d.sisaHari} hari lagi)`,
-    `Tambahan: ${tambahan.length ? tambahan.join(", ") : "tidak ada"}`,
+    ...(tambahan.length ? [`Tambahan: ${tambahan.join(", ")}`] : []),
     `Lampiran: ${d.jmlFile} file, total ${d.totalHlm} hlm (akan kukirim di chat ini)`,
     "",
     "*Kebutuhan detail*",

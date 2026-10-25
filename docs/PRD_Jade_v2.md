@@ -39,7 +39,7 @@ Web ini membuat klien tahu estimasi biaya berdasarkan jenis tugas, lampiran, out
    - Mahasiswa: prodi/jurusan, mata kuliah, semester (**diketik bebas**).
    - Pelajar: kelas dan mata pelajaran (**dipilih dari daftar pendek**).
 3. Pilih **jenis tugas** dari daftar sesuai jenjang, atau **"Tugas lainnya"**.
-4. Isian pesanan: target output, jumlah file lampiran, total halaman lampiran, kebutuhan detail, ketentuan tugas, format output, tenggat, dan opsi tambahan.
+4. Isian pesanan: target output, jumlah file lampiran, total halaman lampiran, kebutuhan detail, ketentuan tugas, format output, tenggat, dan opsi tambahan (sitasi dan penjelasan hasil disembunyikan sementara).
 5. **Estimasi biaya** (kisaran) muncul langsung dan berubah saat pilihan diubah.
 6. Tombol **"Kirim ke WhatsApp"**: pesan otomatis berisi semua pilihan, kisaran estimasi, dan kode pesanan.
 7. Saat tombol ditekan, pesanan **tercatat otomatis ke Google Sheets** dengan status "Draf".
@@ -59,7 +59,7 @@ Web ini membuat klien tahu estimasi biaya berdasarkan jenis tugas, lampiran, out
 2. Klien mengisi prodi/kelas/semester dan mata kuliah/pelajaran, lalu memilih **jenis tugas** atau "Tugas lainnya".
 3. Klien mengisi **jumlah file lampiran** dan **total halaman semua lampiran**.
 4. Klien mengisi target output, kebutuhan detail, ketentuan tugas, format output, dan tenggat.
-5. Klien memilih opsi tambahan (sitasi diperiksa, penjelasan hasil).
+5. Opsi sitasi diperiksa dan penjelasan hasil disembunyikan sementara; klien melewati pilihan ini. Keduanya dapat ditampilkan kembali.
 6. **Estimasi** muncul langsung dan berubah saat pilihan diubah. Peringatan "ini estimasi awal" selalu tampil di dekat angka.
 7. Klien menekan **"Kirim ke WhatsApp"**. Data masuk ke Sheets, lalu WhatsApp terbuka dengan pesan otomatis.
 8. Klien mengirim lampiran lewat WhatsApp.
@@ -82,8 +82,8 @@ Jika pengiriman ke Sheets gagal, WhatsApp **tetap terbuka** supaya pesanan tidak
 | Format output | pilihan (string) | Teks / Word / PDF / PPT / Excel |
 | Tenggat | tanggal | Tidak boleh sebelum hari ini |
 | Sisa hari ke tenggat | integer | Dihitung otomatis dari tenggat |
-| Sitasi diperiksa manual | pilihan | Ya / Tidak |
-| Penjelasan hasil | pilihan | Ya / Tidak |
+| Sitasi diperiksa manual | pilihan | Ya / Tidak; sementara disembunyikan, web memakai Tidak |
+| Penjelasan hasil | pilihan | Ya / Tidak; sementara disembunyikan, web memakai Tidak |
 | Kebutuhan detail | teks | Maks 1000 karakter |
 | Ketentuan tugas | teks | Maks 1000 karakter |
 | **Uang (semua harga)** | **integer** | Rupiah bulat, tanpa desimal |
@@ -91,6 +91,8 @@ Jika pengiriman ke Sheets gagal, WhatsApp **tetap terbuka** supaya pesanan tidak
 | Kode pesanan | string | Format `JD-0001`, bertambah otomatis |
 
 ## 7. Aturan Perhitungan
+
+Sitasi dan penjelasan hasil disembunyikan sementara dari form dan ringkasan; dapat ditampilkan kembali. Rumus, tarif, dan dukungan perhitungan keduanya tetap dipertahankan. Web memakai `sitasi: false`, `penjelasan: false`, dan mengirim `opsi: []` ke Sheets.
 
 Semua angka diambil dari tab **Tugas** dan **Harga** di Google Sheets (nilai awal ada di Lampiran A).
 
@@ -184,7 +186,7 @@ Jika menolak, kami tawarkan alternatif, misalnya kerangka atau penjelasan materi
 |---|---|
 | Klien mengira estimasi = harga pasti, atau harga tidak bisa nego | Teks peringatan wajib, estimasi berbentuk kisaran, ada kalimat "bisa didiskusikan" |
 | Harga salah hitung | Contoh uji, hitung manual sebelum rilis, harga diambil dari satu sumber (Sheets) |
-| AI salah atau mengarang referensi | Pemeriksaan oleh orang kedua, opsi sitasi diperiksa manual |
+| AI salah atau mengarang referensi | Pemeriksaan oleh orang kedua; opsi sitasi diperiksa manual sementara disembunyikan dari web |
 | Jatah pemakaian Claude Pro habis | Pantau di Settings > Usage, batasi pesanan per hari, kolom waktu dan biaya di Sheets |
 | Klien melanggar aturan akademik | Aturan bisnis, penyebutan layanan sebagai pendampingan, daftar tolak |
 | Spam atau data sampah masuk ke Sheets | Batas panjang isian, validasi, pengecekan berkala |
@@ -194,6 +196,8 @@ Jika menolak, kami tawarkan alternatif, misalnya kerangka atau penjelasan materi
 | Harga di browser bisa diubah orang yang paham kode | Aman untuk tahap awal karena harga final dikonfirmasi admin |
 
 ## 14. Contoh Uji (hitung manual)
+
+Contoh dengan sitasi atau penjelasan tetap menguji kemampuan rumus, meskipun pilihan keduanya sementara tidak tersedia di web. Angka uji tidak berubah.
 
 | No | Kasus | Hasil yang diharapkan |
 |---|---|---|
