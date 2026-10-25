@@ -126,7 +126,7 @@
       ? hitungEstimasi(config, {
           jenjang: jenjang(), tugas: $("jenis").value, target: angkaIsian("target"),
           halaman: jmlFileNol() ? 0 : angkaIsian("total-hlm"), sisaHari: sisa,
-          format: $("format").value, sitasi: $("sitasi").checked, penjelasan: $("penjelasan").checked
+          format: $("format").value, sitasi: false, penjelasan: false
         })
       : null;
     return { sisa, hasil };
@@ -245,6 +245,7 @@
 
   // Wizard: tiap langkah hanya tampil sendiri; kolom yang salah pertama (urutan tampil) mendapat fokus
   const penunjuk = $("penunjuk");
+  penunjuk.replaceChildren();
   LANGKAH.forEach((l) => {
     const li = document.createElement("li");
     const s = document.createElement("span");
@@ -265,7 +266,6 @@
       [lab("jenis"), tugasLainnya() ? `Tugas lainnya (${$("jenis-lain").value.trim()})` : $("jenis").value],
       [lab("target"), $("target").value],
       [lab("format"), $("format").value],
-      ["Tambahan", [$("sitasi").checked && "Sitasi diperiksa", $("penjelasan").checked && "Penjelasan hasil"].filter(Boolean).join(", ") || "Tidak ada"],
       [lab("jml-file"), $("jml-file").value],
       ...(jmlFileNol() ? [] : [[lab("total-hlm"), $("total-hlm").value]]),
       [lab("tenggat"), tanggalIndonesia($("tenggat").value)]
@@ -392,7 +392,7 @@
         target: Number($("target").value),
         format: $("format").value,
         tenggat: $("tenggat").value,
-        opsi: [$("sitasi").checked && "Sitasi diperiksa", $("penjelasan").checked && "Penjelasan hasil"].filter(Boolean),
+        opsi: [],
         kebutuhan: $("kebutuhan").value.trim(),
         ketentuan: $("ketentuan").value.trim(),
         // Estimasi tidak ditampilkan (lampiran > batas atau data harga belum terbaca): dicatat 0
@@ -408,7 +408,7 @@
         target: Number($("target").value), satuan: tugas.satuan,
         jmlFile: Number($("jml-file").value), totalHlm: jmlFileNol() ? 0 : Number($("total-hlm").value),
         format: $("format").value, tenggat: $("tenggat").value, sisaHari: sisa,
-        sitasi: $("sitasi").checked, penjelasan: $("penjelasan").checked,
+        sitasi: false, penjelasan: false,
         kebutuhan: $("kebutuhan").value, ketentuan: $("ketentuan").value,
         bawah: hasil.bawah, atas: hasil.status === "ok" ? hasil.atas : null,
         hargaBelumTerbaca: hasil.status !== "ok" && hasil.status !== "hubungi",

@@ -7,7 +7,7 @@ Semua teks di sini adalah **teks resmi** untuk tampilan. Claude Code memakainya 
 | No | Bagian | Isi |
 |---|---|---|
 | 1 | Header | Nama "Jade" dan tautan jangkar "Pesan sekarang" |
-| 2 | Pembuka | Judul, subjudul, tombol "Mulai pesan" (menuju form) |
+| 2 | Pembuka | Judul: "Selesaikan Tugas Lebih Cepat dengan Model Claude Pro!" Caption: "Kami menggunakan dukungan AI Claude Pro untuk menyusun draf bahan belajar yang komprehensif dan akurat. Tentukan jenis tugasmu, dapatkan estimasi harga, dan lanjutkan pemesanan lewat WhatsApp. Belajar jadi lebih mudah dan terarah." Tombol "Mulai pesan" (menuju form) |
 | 3 | Cara kerja | 4 langkah singkat |
 | 4 | **Form pesanan** | Bagian inti (Bagian 2 dokumen ini) |
 | 5 | Yang kami terima dan tidak kami terima | Dua daftar ringkas |
@@ -23,7 +23,7 @@ Form berupa **wizard 4 langkah** dalam satu `<form>`. Semua kolom ada di halaman
 | Langkah | Kolom |
 |---|---|
 | 1. Tentang kamu | Jenjang, prodi, semester, mata kuliah, kelas, mata pelajaran (+ ketik sendiri) |
-| 2. Tugasmu | Jenis tugas (+ nama tugas lainnya), target output, format output, opsi tambahan |
+| 2. Tugasmu | Jenis tugas (+ nama tugas lainnya), target output, format output |
 | 3. Lampiran dan tenggat | Jumlah file, total halaman, tenggat |
 | 4. Tinjau dan kirim | Ringkasan langkah 1 sampai 3, kebutuhan detail, ketentuan tugas, persetujuan |
 
@@ -77,6 +77,8 @@ Di bawah tenggat tampil: "Sisa {{n}} hari" dan, bila ada, faktor yang berlaku ("
 
 ### F. Tambahan (opsional)
 
+Sitasi dan penjelasan hasil disembunyikan sementara dari form dan ringkasan; dapat ditampilkan kembali. Rumus, tarif, dan dukungan perhitungan keduanya tetap dipertahankan. Web memakai `sitasi: false`, `penjelasan: false`, dan mengirim `opsi: []` ke Sheets.
+
 | Isian | Jenis | Teks |
 |---|---|---|
 | Sitasi diperiksa manual | Kotak centang | "Sitasi dan referensi kami periksa satu per satu (maks 10 referensi). +Rp{{tambahanSitasi}}" |
@@ -111,10 +113,12 @@ Satu kolom teks bernama `website`, **disembunyikan** dari manusia (CSS, `tabinde
 5. Enter di langkah 1 sampai 3 sama dengan Lanjut. Di langkah 4, Enter di area teks membuat baris baru dan kirim hanya lewat tombol.
 6. Langkah yang tidak aktif disembunyikan (`hidden`) sehingga tidak bisa difokus. Form memakai `novalidate` dan tanpa atribut `required` native.
 7. Tidak ada penyimpanan per langkah. Data dikirim ke Sheets sekali, di akhir.
-8. Ringkasan di langkah 4 memuat isian langkah 1 sampai 3 (jenjang, prodi atau kelas, semester, mata kuliah atau mata pelajaran, jenis tugas, target output, format, tambahan, jumlah file, total halaman, tenggat), ditampilkan sebagai teks (`textContent`).
+8. Ringkasan di langkah 4 memuat isian langkah 1 sampai 3 (jenjang, prodi atau kelas, semester, mata kuliah atau mata pelajaran, jenis tugas, target output, format, jumlah file, total halaman, tenggat), ditampilkan sebagai teks (`textContent`).
 9. Mengganti jenjang di langkah 1 tetap mengosongkan isian turunannya (Bagian 2A), termasuk jenis tugas dan target output di langkah 2.
 
 ## 4. Kartu estimasi (keadaan dan teks)
+
+Sitasi dan penjelasan hasil disembunyikan sementara dari form dan ringkasan; dapat ditampilkan kembali. Rumus, tarif, dan dukungan perhitungan keduanya tetap dipertahankan. Web memakai `sitasi: false`, `penjelasan: false`, dan mengirim `opsi: []` ke Sheets.
 
 | Keadaan | Tampilan |
 |---|---|
@@ -165,7 +169,7 @@ Jenis tugas: {{jenis_tugas}}
 Target output: {{target}} {{satuan}}
 Format output: {{format}}
 Tenggat: {{tanggal, contoh 28 Okt 2026}} ({{n}} hari lagi)
-Tambahan: {{daftar opsi, atau "tidak ada"}}
+{{Tambahan: daftar opsi (hanya bila tidak kosong)}}
 Lampiran: {{jumlah_file}} file, total {{total_halaman}} hlm (akan kukirim di chat ini)
 
 *Kebutuhan detail*
@@ -179,6 +183,8 @@ _Estimasi awal, harga final menunggu konfirmasi dari kalian._
 ```
 
 Gaya: satu baris kosong antar bagian. Tebal (*...*) hanya untuk judul bagian, baris kode pesanan, dan baris estimasi. Miring (_..._) hanya untuk keterangan estimasi dan catatan. Untuk Pelajar, baris "Kelas" menggantikan "Prodi" dan tidak ada baris "Semester".
+
+Baris "Tambahan: ..." dihilangkan bila opsi kosong. Selama opsi disembunyikan sementara, baris ini tidak muncul pada pesan dari web; bentuk masukan penyusun pesan tetap sama.
 
 Aturan:
 1. Jika teks dipotong, tambahkan " ... (selengkapnya di pesanan {{kode}})". Teks lengkap sudah tersimpan di Sheets. Pemotongan dihitung per karakter utuh (grafem, lewat `Intl.Segmenter`; cadangan `Array.from`), bukan per unit, agar emoji tidak rusak. Hitungan memakai teks asli, sebelum karakter lebar-nol disisipkan.
@@ -216,9 +222,9 @@ Daftar ini disimpan di `assets/js/config.js` (bukan di Sheets).
 | Tombol wizard | Kembali, Lanjut, dan di akhir Kirim ke WhatsApp |
 | Keterangan kolom wajib | * wajib diisi |
 | Estimasi di langkah 1 dan 2 | Estimasi muncul setelah kamu mengisi sampai langkah 3. |
-| Judul ringkasan (langkah 4) | Ringkasan pesananmu (nilai opsi tambahan kosong: Tidak ada) |
-| Judul pembuka | Estimasi biaya pendampingan tugasmu, dalam 3 menit |
-| Subjudul | Pilih jenis tugas, isi kebutuhanmu, lihat estimasinya, lalu kirim ke kami lewat WhatsApp. Kami bantu menyusun draf bahan belajar, kamu yang memeriksa dan memahaminya. |
+| Judul ringkasan (langkah 4) | Ringkasan pesananmu (tanpa baris opsi tambahan selama disembunyikan sementara) |
+| Judul pembuka | Selesaikan Tugas Lebih Cepat dengan Model Claude Pro! |
+| Subjudul | Kami menggunakan dukungan AI Claude Pro untuk menyusun draf bahan belajar yang komprehensif dan akurat. Tentukan jenis tugasmu, dapatkan estimasi harga, dan lanjutkan pemesanan lewat WhatsApp. Belajar jadi lebih mudah dan terarah. |
 | Tombol pembuka | Mulai pesan |
 | Status memuat data (form terkunci, hilang saat data selesai atau 8 detik habis; `role="status"`) | Sebentar ya, sedang memuat daftar tugas dan harga terbaru... |
 | Cara kerja, judul | Cara kerjanya |

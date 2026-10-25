@@ -9,7 +9,7 @@ const LANGKAH = [
   {
     judul: "Tugasmu",
     penjelas: "Pilih jenis tugas dan hasil yang kamu butuhkan.",
-    kolom: ["jenis", "jenis-lain", "target", "format", "sitasi", "penjelasan"]
+    kolom: ["jenis", "jenis-lain", "target", "format"]
   },
   {
     judul: "Lampiran dan tenggat",

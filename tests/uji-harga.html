@@ -144,7 +144,7 @@
     ["W1", "Mahasiswa: semua baris persis format", lengkap, pesanMhs],
     ["W2", "Pelajar: Kelas dan mapel, tanpa Semester/Prodi, Tambahan penjelasan", "benar",
       pesanPlj.includes("\nKelas: 11\nMata pelajaran: Fisika\n\n*Tugas*\nJenis") && !/Semester|Prodi/.test(pesanPlj) && pesanPlj.includes("Tambahan: Penjelasan hasil") ? "benar" : "salah"],
-    ["W3", "Tambahan kosong", "Tambahan: tidak ada", susunPesanWA(Object.assign({}, mhs, { sitasi: false })).match(/Tambahan: .*/)[0]],
+    ["W3", "Opsi kosong tidak menghasilkan baris Tambahan", "tanpa Tambahan", /^Tambahan:/m.test(susunPesanWA(Object.assign({}, mhs, { sitasi: false, penjelasan: false }))) ? "ada Tambahan" : "tanpa Tambahan"],
     ["W4", "Teks tepat 400 karakter tidak dipotong", "tanpa keterangan", String(!panjang400.includes("selengkapnya") ? "tanpa keterangan" : "dipotong")],
     ["W5", "Teks 401 karakter dipotong jadi 400 + keterangan",
       "a".repeat(400) + " ... (selengkapnya di pesanan JD-OFF-AB12)", panjang401.split("\n")[19].slice(2)],
@@ -175,6 +175,8 @@
       sheetsGagal.split("\n").slice(-2).join("|") === "|_Catatan: pesanan belum tercatat otomatis._" && sheetsGagal.startsWith(pesanMhs) ? "benar" : "salah"],
     ["W20", "Judul bagian tebal; tanpa nomor HP/data pribadi", "benar",
       ["*Identitas*", "*Tugas*", "*Kebutuhan detail*", "*Ketentuan tugas*"].every((t) => pesanMhs.includes("\n" + t + "\n")) && !/\d{9,}/.test(pesanMhs) ? "benar" : "salah"],
+    ["W21", "Opsi kosong: Tenggat langsung diikuti Lampiran", "benar",
+      susunPesanWA(Object.assign({}, mhs, { sitasi: false, penjelasan: false })).includes("Tenggat: 28 Okt 2026 (4 hari lagi)\nLampiran:") ? "benar" : "salah"],
     ["P1", "potongTeks: tepat 400 karakter tidak dipotong", "a".repeat(400), potongTeks("a".repeat(400), "K1")],
     ["P2", "potongTeks: 401 karakter dipotong 400 + keterangan", "a".repeat(400) + " ... (selengkapnya di pesanan K1)", potongTeks("a".repeat(401), "K1")],
     ["P3", "potongTeks: emoji di batas 399-400 tetap sah", "sah",
@@ -272,7 +274,9 @@
       ["WZ4", "Kolom jebakan website tidak ada di langkah mana pun", "tidak ada", semua.includes("website") ? "ada" : "tidak ada"],
       ["WZ5", "Empat langkah, judul dan kalimat penjelas terisi", "4", String(LANGKAH.filter((l) => l.judul && l.penjelas && l.kolom.length).length)],
       ["WZ6", "Tidak ada atribut required native (form novalidate)", "0", String(doc.querySelectorAll("form [required]").length)],
-      ["WZ7", "Setiap langkah punya pembungkus data-langkah di form", "4", String(doc.querySelectorAll("form [data-langkah]").length)]
+      ["WZ7", "Setiap langkah punya pembungkus data-langkah di form", "4", String(doc.querySelectorAll("form [data-langkah]").length)],
+      ["WZ8", "Opsi sementara tidak ada di form dan pemetaan langkah", "tidak ada",
+        doc.querySelector("#sitasi, #penjelasan") || semua.some((id) => ["sitasi", "penjelasan"].includes(id)) ? "ada" : "tidak ada"]
     ].map(([no, nama, harap, hasil]) => [no, nama, harap, hasil, harap === hasil]);
   }
 

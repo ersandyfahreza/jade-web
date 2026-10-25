@@ -4,11 +4,15 @@ Gunanya: memastikan harga tidak salah hitung, web nyaman di HP, dan pesanan tida
 
 ## 1. Uji hitung harga
 
+Sitasi dan penjelasan hasil disembunyikan sementara dari form dan ringkasan; dapat ditampilkan kembali. Rumus, tarif, dan dukungan perhitungan keduanya tetap dipertahankan. Web memakai `sitasi: false`, `penjelasan: false`, dan mengirim `opsi: []` ke Sheets. Semua kasus dan angka uji harga dengan opsi aktif tetap berlaku untuk fungsi hitung.
+
 Halaman `tests/uji-harga.html` memuat semua baris di bawah, menghitung dengan `pricing.js` dan `data/fallback.js`, lalu menampilkan **OK** atau **CEK** per baris. Semua harus OK sebelum rilis.
 
 Uji logika server (validasi, awalan `'`, kolom jebakan, kode pesanan, duplikat): jalankan `node tests/uji-server.js`. Semua baris harus OK.
 
-Uji pemetaan wizard (setiap kolom form ada di tepat satu langkah di `assets/js/langkah.js`, tidak ada `required` native) ada di bagian terakhir `tests/uji-harga.html` (baris WZ1 sampai WZ7). Halaman ini harus dibuka lewat `http://localhost:8000/tests/uji-harga.html` karena membaca `index.html`.
+Uji pengiriman form: jalankan `node tests/uji-form.js` dengan `playwright-core` dan Chromium tersedia. Jika Playwright berada di folder alat terpisah, arahkan `NODE_PATH` ke folder `node_modules` tersebut. Uji ini membuka halaman asli pada lebar 360 px, memakai Sheets dan WhatsApp tiruan, serta mencegat semua permintaan jaringan. Kedua alur (mahasiswa berhasil, pelajar gagal mencatat ke Sheets) harus OK: satu POST dengan `opsi: []`, ringkasan dan pesan tanpa Tambahan, tanpa galat JavaScript. Tidak memerlukan server lokal dan tidak mengirim POST asli.
+
+Uji pemetaan wizard (setiap kolom form ada di tepat satu langkah di `assets/js/langkah.js`, tidak ada `required` native) ada di bagian terakhir `tests/uji-harga.html` (baris WZ1 sampai WZ8). Halaman ini harus dibuka lewat `http://localhost:8000/tests/uji-harga.html` karena membaca `index.html`.
 
 Nilai awal harga (Template): lampiran gratis 20 halaman, Rp3.000 per 10 halaman, faktor tenggat 0 hari ×1,5, 1-2 hari ×1,25, 3-4 hari ×1,1, 5 hari atau lebih ×1,0, format di luar standar Rp5.000, sitasi Rp15.000, penjelasan Rp10.000, pengali atas ×1,2, tugas lainnya ×0,8 sampai ×1,6, pembulatan ke atas Rp1.000.
 
@@ -79,6 +83,11 @@ Dicoba di HP asli (minimal satu Android atau iPhone) dan di komputer.
 | G11 | Gerak di HP kelas bawah atau lama | Tidak patah-patah (hanya transform dan opacity yang dipakai). Catat bila terasa berat |
 | W11 | Pembaca layar sungguhan (TalkBack atau VoiceOver) saat pindah langkah | Pengumuman terdengar sekali dan jelas, tidak ganda atau memotong |
 
+| No | Yang dicek | Lolos jika |
+|---|---|---|
+| O1 | Langkah 2 dan ringkasan langkah 4 | Tidak ada bagian atau baris Tambahan, sitasi, maupun penjelasan hasil |
+| O2 | Uji pesan W3/W21 dan pemetaan WZ8 di halaman uji | Opsi kosong tidak menghasilkan baris Tambahan; kedua kontrol tidak ada di form maupun pemetaan |
+
 ## 3. Uji pesanan dan Sheets
 
 | No | Yang dicek | Lolos jika |
@@ -100,6 +109,8 @@ Dicoba di HP asli (minimal satu Android atau iPhone) dan di komputer.
 | S15 | Tekan "Salin pesan" di alamat tanpa HTTPS atau saat izin clipboard ditolak | Kotak teks berisi pesan muncul dan terpilih, bisa disalin manual |
 | S16 | Total halaman lampiran 101 | Estimasi tidak tampil, tombol "Hubungi kami lewat WhatsApp", baris Estimasi di pesan memakai kalimat "lampiran lebih dari 100 hlm" |
 | S17 | Hapus baris tenggat hari 0 dari tab Harga (atau dari `data/fallback.js` saat uji), muat ulang, lalu kirim | Pesanan tetap terkirim, baris Estimasi di pesan: "tidak dihitung (data harga belum terbaca)", bukan kalimat lampiran |
+| S18 | Pengiriman dengan mock (tanpa POST ke Apps Script asli) | Data tetap berbentuk sama, `opsi: []`; masukan penyusun pesan `sitasi: false`, `penjelasan: false`; WhatsApp tanpa baris Tambahan; tidak ada galat referensi elemen |
+
 
 ## 4. Daftar periksa sebelum rilis (soft launch)
 
