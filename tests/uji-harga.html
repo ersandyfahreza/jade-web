@@ -45,6 +45,7 @@
   <thead><tr><th>No</th><th>Kasus</th><th>Diharapkan</th><th>Hasil hitung</th><th>Status</th></tr></thead>
   <tbody id="baris6"></tbody>
 </table>
+<script src="data-uji.js"></script>
 <script src="../data/fallback.js"></script>
 <script src="../assets/js/muat-config.js"></script>
 <script src="../assets/js/pricing.js"></script>
@@ -74,7 +75,7 @@
   const baris = [];
 
   KASUS.forEach(([no, jenjang, tugas, target, halaman, sisaHari, format, sitasi, penjelasan, bawah, atas]) => {
-    const r = hitungEstimasi(FALLBACK_CONFIG, { jenjang, tugas, target, halaman, sisaHari, format, sitasi, penjelasan });
+    const r = hitungEstimasi(DATA_UJI, { jenjang, tugas, target, halaman, sisaHari, format, sitasi, penjelasan });
     const ok = r.status === "ok" && r.bawah === bawah && r.atas === atas;
     baris.push([no, `${jenjang} - ${tugas}`, `${rp(bawah)} - ${rp(atas)}`, r.status === "ok" ? `${rp(r.bawah)} - ${rp(r.atas)}` : r.status, ok]);
   });
@@ -86,12 +87,12 @@
     ["M", "Target 0", "tidakBisa: target", { target: 0 }, (r) => r.status === "tidakBisa" && r.alasan === "target"],
     ["M", "Target 201", "tidakBisa: target", { target: 201 }, (r) => r.status === "tidakBisa" && r.alasan === "target"]
   ].forEach(([no, nama, harap, ubah, cek]) => {
-    const r = hitungEstimasi(FALLBACK_CONFIG, Object.assign({}, dasar, ubah));
+    const r = hitungEstimasi(DATA_UJI, Object.assign({}, dasar, ubah));
     baris.push([no, nama, harap, r.status + (r.alasan ? ": " + r.alasan : ""), cek(r)]);
   });
 
   // Bagian 2: sisa hari (Asia/Jakarta), label tenggat, dan tabel tenggat rusak. [no, kasus, diharapkan, hasil]
-  const tanpaBaris0 = { tugas: FALLBACK_CONFIG.tugas, harga: Object.assign({}, FALLBACK_CONFIG.harga, { tenggat: [{ minHari: 3, pengali: 1.1 }] }) };
+  const tanpaBaris0 = { tugas: DATA_UJI.tugas, harga: Object.assign({}, DATA_UJI.harga, { tenggat: [{ minHari: 3, pengali: 1.1 }] }) };
   const hariIniTes = hitungEstimasi(tanpaBaris0, Object.assign({}, dasar, { sisaHari: 0 }));
   const baris2 = [
     ["S1", "Hari yang sama", 0, hitungSisaHari("2026-10-24", "2026-10-24")],
@@ -100,14 +101,14 @@
     ["S4", "Tenggat kosong", "NaN", String(hitungSisaHari("", "2026-10-24"))],
     ["S5", "Jakarta: 31 Okt 16:59 UTC", "2026-10-31", tanggalJakarta(new Date("2026-10-31T16:59:00Z"))],
     ["S6", "Jakarta: 31 Okt 17:00 UTC sudah 1 Nov", "2026-11-01", tanggalJakarta(new Date("2026-10-31T17:00:00Z"))],
-    ["L0", "Label sisa 0 hari", "Sisa 0 hari. Tenggat 0 hari: biaya x1,5", labelTenggat(FALLBACK_CONFIG, 0)],
-    ["L1", "Label sisa 1 hari", "Sisa 1 hari. Tenggat 1-2 hari: biaya x1,25", labelTenggat(FALLBACK_CONFIG, 1)],
-    ["L2", "Label sisa 2 hari", "Sisa 2 hari. Tenggat 1-2 hari: biaya x1,25", labelTenggat(FALLBACK_CONFIG, 2)],
-    ["L3", "Label sisa 3 hari", "Sisa 3 hari. Tenggat 3-4 hari: biaya x1,1", labelTenggat(FALLBACK_CONFIG, 3)],
-    ["L4", "Label sisa 4 hari", "Sisa 4 hari. Tenggat 3-4 hari: biaya x1,1", labelTenggat(FALLBACK_CONFIG, 4)],
-    ["L5", "Label sisa 5 hari (tanpa faktor)", "Sisa 5 hari", labelTenggat(FALLBACK_CONFIG, 5)],
-    ["L6", "Label sisa 30 hari (tanpa faktor)", "Sisa 30 hari", labelTenggat(FALLBACK_CONFIG, 30)],
-    ["L7", "Label tenggat kosong", "", labelTenggat(FALLBACK_CONFIG, NaN)],
+    ["L0", "Label sisa 0 hari", "Sisa 0 hari. Tenggat 0 hari: biaya x1,5", labelTenggat(DATA_UJI, 0)],
+    ["L1", "Label sisa 1 hari", "Sisa 1 hari. Tenggat 1-2 hari: biaya x1,25", labelTenggat(DATA_UJI, 1)],
+    ["L2", "Label sisa 2 hari", "Sisa 2 hari. Tenggat 1-2 hari: biaya x1,25", labelTenggat(DATA_UJI, 2)],
+    ["L3", "Label sisa 3 hari", "Sisa 3 hari. Tenggat 3-4 hari: biaya x1,1", labelTenggat(DATA_UJI, 3)],
+    ["L4", "Label sisa 4 hari", "Sisa 4 hari. Tenggat 3-4 hari: biaya x1,1", labelTenggat(DATA_UJI, 4)],
+    ["L5", "Label sisa 5 hari (tanpa faktor)", "Sisa 5 hari", labelTenggat(DATA_UJI, 5)],
+    ["L6", "Label sisa 30 hari (tanpa faktor)", "Sisa 30 hari", labelTenggat(DATA_UJI, 30)],
+    ["L7", "Label tenggat kosong", "", labelTenggat(DATA_UJI, NaN)],
     ["T1", "Tabel tenggat tanpa baris 0, sisa 0", "tidakBisa: aturanTenggat", hariIniTes.status + ": " + hariIniTes.alasan]
   ].map(([no, nama, harap, hasil]) => [no, nama, String(harap), String(hasil), String(harap) === String(hasil)]);
 
@@ -193,10 +194,11 @@
         return p.includes("\u{1F600} ... (selengkapnya di pesanan JD-OFF-AB12)") ? "sah" : "salah"; })()]
   ].map(([no, nama, harap, hasil]) => [no, nama, String(harap), String(hasil), String(harap) === String(hasil)]);
 
-  // Bagian 4: validasiConfig (Tahap 5). Config rusak harus "gagal", config fallback harus "lolos".
-  const salin = (ubah) => { const c = JSON.parse(JSON.stringify(FALLBACK_CONFIG)); ubah(c); return validasiConfig(c) ? "gagal" : "lolos"; };
+  // Bagian 4: config rusak memakai data tetap; fallback produksi diperiksa terpisah.
+  const salin = (ubah) => { const c = JSON.parse(JSON.stringify(DATA_UJI)); ubah(c); return validasiConfig(c) ? "gagal" : "lolos"; };
   const baris4 = [
-    ["V1", "Config fallback", "lolos", salin(() => {})],
+    ["V1", "Config data uji Template", "lolos", salin(() => {})],
+    ["VF", "Fallback: struktur sah, tanpa tugas ganda, tabel tenggat valid", "lolos", validasiConfig(FALLBACK_CONFIG) || "lolos"],
     ["V2", "ok:false dari Apps Script", "gagal", salin((c) => { c.ok = false; })],
     ["V3", "Jenjang Pelajar tanpa tugas", "gagal", salin((c) => { c.tugas = c.tugas.filter((t) => t.jenjang !== "Pelajar"); })],
     ["V4", "Harga dasar bukan angka", "gagal", salin((c) => { c.tugas[0].hargaDasar = "abc"; })],
