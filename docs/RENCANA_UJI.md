@@ -6,7 +6,7 @@ Gunanya: memastikan harga tidak salah hitung, web nyaman di HP, dan pesanan tida
 
 Sitasi dan penjelasan hasil disembunyikan sementara dari form dan ringkasan; dapat ditampilkan kembali. Rumus, tarif, dan dukungan perhitungan keduanya tetap dipertahankan. Web memakai `sitasi: false`, `penjelasan: false`, dan mengirim `opsi: []` ke Sheets. Semua kasus dan angka uji harga dengan opsi aktif tetap berlaku untuk fungsi hitung.
 
-Halaman `tests/uji-harga.html` memuat semua baris di bawah, menghitung dengan `pricing.js` dan `data/fallback.js`, lalu menampilkan **OK** atau **CEK** per baris. Semua harus OK sebelum rilis.
+Halaman `tests/uji-harga.html` memuat semua baris di bawah, menghitung dengan `pricing.js` dan nilai tetap Template di `tests/data-uji.js`, lalu menampilkan **OK** atau **CEK** per baris. `data/fallback.js` diperiksa terpisah lewat `validasiConfig` (struktur sah, tanpa tugas ganda, tabel tenggat valid). Semua harus OK sebelum rilis.
 
 Uji logika server (validasi, awalan `'`, kolom jebakan, kode pesanan, duplikat): jalankan `node tests/uji-server.js`. Semua baris harus OK.
 
